@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.fisko.music.ui.songs.SongsFragment"
+    android:orientation="vertical">
+
+    <android.support.v4.view.ViewPager
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/song_pager"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+
+        <ImageButton
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/player_control"
+            android:background="@android:drawable/ic_media_play"
+            android:contentDescription="@string/media_control"
+            android:layout_centerInParent="true"/>
+
+        <ImageButton
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/prev_song_button"
+            android:background="@android:drawable/ic_media_previous"
+            android:contentDescription="@string/media_previous"
+            android:layout_toRightOf="@id/player_control"
+            android:layout_toEndOf="@id/player_control"/>
+
+        <ImageButton
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/next_song_button"
+            android:background="@android:drawable/ic_media_next"
+            android:contentDescription="@string/media_previous"
+            android:layout_toLeftOf="@id/player_control"
+            android:layout_toStartOf="@id/player_control"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Music</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_music">Item</string>
+    <string name="media_previous">Media previous</string>
+    <string name="media_control">Media control</string>
+</resources>
