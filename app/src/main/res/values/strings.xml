@@ -6,4 +6,10 @@
     <string name="search_music">Item</string>
     <string name="media_previous">Media previous</string>
     <string name="media_control">Media control</string>
+    <string name="playing_state">Playing State</string>
+    <string name="song_image">Song Image</string>
+    <string name="recent_songs">Recent Songs</string>
+    <string name="albums">Albums</string>
+    <string name="remove">Remove</string>
+    <string name="current_playing">Current playing</string>
 </resources>

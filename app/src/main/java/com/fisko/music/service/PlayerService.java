@@ -1,5 +1,7 @@
 package com.fisko.music.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -8,14 +10,16 @@ import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
 
+import com.fisko.music.R;
 import com.fisko.music.data.Song;
-import com.google.common.collect.ComparisonChain;
+import com.fisko.music.ui.songs.SongsActivity;
+import com.fisko.music.utils.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Objects;
 
 
 public class PlayerService extends Service implements
@@ -27,6 +31,7 @@ public class PlayerService extends Service implements
     }
 
     private static final int UPDATE_DELAY = 100;
+    private static final int NOTIFICATION_ID = 100;
 
     private final IBinder mBinder = new LocalBinder();
     private LinkedList<PlayerCallback> mCallbacks = new LinkedList<>();
@@ -89,7 +94,6 @@ public class PlayerService extends Service implements
 
             public void onFinish() {}
         }.start();
-
     }
 
     public void setCurDataSource() {
@@ -101,7 +105,8 @@ public class PlayerService extends Service implements
         }
     }
 
-    public void play(int songIndex, ArrayList<Song> songs, String albumId) {
+    public void play(int songIndex, ArrayList<Song> songs) {
+        String albumId = songs.get(songIndex).getAlbumId();
         boolean isPause = mMediaPlayer != null && !mMediaPlayer.isPlaying();
         boolean isSongNotChanged = albumId.equals(mAlbumId) && songIndex == mSongIndex;
 
@@ -135,6 +140,19 @@ public class PlayerService extends Service implements
         if (mTimer != null) {
             mTimer.cancel();
         }
+        stopForeground(true);
+    }
+
+    private Notification getNotification() {
+        Song song = mSongs.get(mSongIndex);
+        Intent songIntent = new Intent(this, SongsActivity.class);
+        songIntent.putExtra(Constants.SONG_BUNDLE.OPENED_SONG, song);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setContentTitle(getString(R.string.current_playing))
+            .setContentText(mSongs.get(mSongIndex).getName())
+            .setContentIntent(PendingIntent.getActivity(this, 0, songIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        return builder.build();
     }
 
     @Override
@@ -148,6 +166,7 @@ public class PlayerService extends Service implements
     public void onPrepared(MediaPlayer mediaPlayer) {
         mMediaPlayer.start();
         notifyCallbacks();
+        startForeground(NOTIFICATION_ID, getNotification());
     }
 
     @Override

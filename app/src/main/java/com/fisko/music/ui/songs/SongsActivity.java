@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import com.fisko.music.R;
-import com.fisko.music.ui.albums.AlbumsListAdapter;
+import com.fisko.music.data.Song;
+import com.fisko.music.utils.Constants;
 
 public class SongsActivity extends AppCompatActivity {
 
@@ -21,8 +22,9 @@ public class SongsActivity extends AppCompatActivity {
         SongsFragment songsFragment =
                 (SongsFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
         if (songsFragment == null) {
-            String albumId = savedInstanceState.getString(AlbumsListAdapter.ALBUM_ID);
-            songsFragment = SongsFragment.newInstance(albumId);
+            String albumId = savedInstanceState.getString(Constants.ALBUM_BUNDLE.ALBUM_ID);
+            Song openedSong = savedInstanceState.getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
+            songsFragment = SongsFragment.newInstance(albumId, openedSong);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.content_frame, songsFragment);
             transaction.commit();

@@ -15,6 +15,8 @@ public interface MusicDataSource {
 
     void deleteAlbum(@NonNull Album album);
 
+    void deleteSong(@NonNull Song song);
+
     @NonNull
     List<Album> getAlbums();
 

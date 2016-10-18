@@ -1,40 +1,36 @@
 package com.fisko.music.ui.songs;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fisko.music.R;
 import com.fisko.music.data.Song;
+import com.fisko.music.utils.UIUtils;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 class SongsListAdapter extends BaseAdapter {
 
-    static final String CURRENT_SONG_INDEX = "CURRENT_SONG_INDEX";
-    static final String SONGS_LIST = "SONGS_LIST";
-    static final String ALBUM_ID = "ALBUM_ID";
-
-    private AppCompatActivity mActivity;
+    private FragmentActivity mActivity;
     private LayoutInflater mInflater;
     private ArrayList<Song> mSongs;
-    private String mAlbumId;
+    private int mPlayingSongIndex;
 
 
-    SongsListAdapter(Activity activity, String albumId) {
+    SongsListAdapter(Activity activity) {
         mInflater = LayoutInflater.from(activity);
         mSongs = new ArrayList<>();
-        mActivity = (AppCompatActivity) activity;
-        mAlbumId = albumId;
+        mActivity = (FragmentActivity) activity;
     }
 
     void replaceData(List<Song> songs) {
@@ -59,6 +55,17 @@ class SongsListAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         TextView songName;
+        ImageView playingIndicator;
+        ImageView albumCover;
+    }
+
+    void setPlayingSong(int playingSongIndex) {
+        mPlayingSongIndex = playingSongIndex;
+    }
+
+    void deleteSong(Song song) {
+        mSongs.remove(song);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -71,34 +78,37 @@ class SongsListAdapter extends BaseAdapter {
             holder = new ViewHolder();
 
             holder.songName = (TextView) view.findViewById(R.id.album_name);
+            holder.playingIndicator = (ImageView) view.findViewById(R.id.song_playing_indicator);
+            holder.albumCover = (ImageView) view.findViewById(R.id.song_image);
 
-            fillHolder(holder, song);
+            fillHolder(holder, song, position);
             view.setTag(holder);
+            mActivity.registerForContextMenu(view);
         } else {
             holder = (ViewHolder) view.getTag();
-            fillHolder(holder, song);
+            fillHolder(holder, song, position);
         }
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openSongPlayer(song);
+                UIUtils.openSongPlayer(song, mSongs, mActivity);
             }
         });
 
         return view;
     }
 
-    private void openSongPlayer(Song song) {
-        Fragment fragment = SongFragment.newInstance(mSongs.indexOf(song), mSongs, mAlbumId);
-        FragmentManager manager = mActivity.getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.content_frame, fragment);
-        transaction.commit();
-    }
-
-    private void fillHolder(ViewHolder holder, Song song) {
+    private void fillHolder(ViewHolder holder, Song song, int songIndex) {
         holder.songName.setText(song.getName());
+        if(songIndex == mPlayingSongIndex) {
+            Drawable drawable = ContextCompat.getDrawable(mActivity, R.drawable.playing_indicator);
+            holder.playingIndicator.setImageDrawable(drawable);
+        } else {
+            holder.playingIndicator.setImageResource(android.R.color.transparent);
+        }
+        String songImageUrl = song.getImagePath();
+        Picasso.with(mActivity).load(songImageUrl).into(holder.albumCover);
     }
 
 

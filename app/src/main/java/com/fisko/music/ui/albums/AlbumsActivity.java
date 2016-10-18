@@ -20,20 +20,6 @@ public class AlbumsActivity extends AppCompatActivity {
     private SearchService mService;
     private boolean mServiceBound;
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            SearchService.LocalBinder binder = (SearchService.LocalBinder) service;
-            mService = binder.getService();
-            mServiceBound = true;
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            mService = null;
-            mServiceBound = false;
-        }
-    };
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,5 +66,19 @@ public class AlbumsActivity extends AppCompatActivity {
         inflater.inflate(R.menu.albums_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            SearchService.LocalBinder binder = (SearchService.LocalBinder) service;
+            mService = binder.getService();
+            mServiceBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            mService = null;
+            mServiceBound = false;
+        }
+    };
+
 
 }

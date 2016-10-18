@@ -4,20 +4,11 @@
     android:layout_height="wrap_content">
 
     <com.fisko.music.ui.view.GridItemView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/album_cover"
         android:contentDescription="@string/playing_state"
         android:layout_marginBottom="@dimen/grid_item_footer_height"/>
-
-    <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:id="@+id/album_playing_indicator"
-        android:contentDescription="@string/playing_state" />
 
     <TextView
         android:layout_width="match_parent"

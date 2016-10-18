@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import java.util.UUID;
 
+import com.google.common.base.Objects;
+
+
 public class Song implements Parcelable {
     private String mId;
     private String mName;
@@ -75,5 +78,21 @@ public class Song implements Parcelable {
             return new Song[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != Song.class) {
+            return false;
+        }
+        final Song song = (Song) obj;
+        return Objects.equal(mId, song.getId()) &&
+                Objects.equal(mName, song.getName()) &&
+                Objects.equal(mPath, song.getPath()) &&
+                Objects.equal(mImagePath, song.getImagePath()) &&
+                Objects.equal(mAlbumId, song.getAlbumId());
+    }
 
 }

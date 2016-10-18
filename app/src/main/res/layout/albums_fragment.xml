@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ListView
+    <com.fisko.music.ui.view.HeaderGridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/albums_list"/>
+        android:verticalSpacing="5dp"
+        android:horizontalSpacing="5dp"
+        android:numColumns="2"
+        android:id="@+id/albums_grid"/>
 
 </LinearLayout>

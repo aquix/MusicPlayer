@@ -13,9 +13,6 @@ import com.fisko.music.data.source.MusicDataSource;
 import com.fisko.music.data.source.MusicRepository;
 import com.fisko.music.data.source.local.MusicLocalDataSource;
 import com.fisko.music.utils.MusicUtils;
-import com.fisko.music.utils.NetworkUtils;
-
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -23,11 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class SearchService extends Service {
 
@@ -69,27 +61,27 @@ public class SearchService extends Service {
 
     private class MusicSearcher implements Runnable {
 
-        ExecutorService mExecutor;
-
-        MusicSearcher() {
-            mExecutor = Executors.newSingleThreadExecutor();
-        }
-
-        private class SongImageSearcher implements Callable<String> {
-            private MusicUtils.SongInfo mSongInfo;
-
-            SongImageSearcher(MusicUtils.SongInfo songInfo) {
-                mSongInfo = songInfo;
-            }
-
-            @Override
-            public String call() throws Exception {
-                String requestUrl = NetworkUtils.genAlbomInfoUrl(mSongInfo);
-                JSONObject json = NetworkUtils.loadURL(requestUrl);
-                assert json != null;
-                return json.getJSONObject("album").getString("medium");
-            }
-        }
+//        ExecutorService mExecutor;
+//
+//        MusicSearcher() {
+//            mExecutor = Executors.newSingleThreadExecutor();
+//        }
+//
+//        private class SongImageSearcher implements Callable<String> {
+//            private MusicUtils.SongInfo mSongInfo;
+//
+//            SongImageSearcher(MusicUtils.SongInfo songInfo) {
+//                mSongInfo = songInfo;
+//            }
+//
+//            @Override
+//            public String call() throws Exception {
+//                String requestUrl = NetworkUtils.genAlbomInfoUrl(mSongInfo);
+//                JSONObject json = NetworkUtils.loadURL(requestUrl);
+//                assert json != null;
+//                return json.getJSONObject("album").getString("medium");
+//            }
+//        }
 
         @Override
         public void run() {
@@ -125,24 +117,25 @@ public class SearchService extends Service {
 
                 String firstSongFileName = albumPath + songsFileName.get(0);
                 MusicUtils.SongInfo firstSongInfo = MusicUtils.extractSongInfo(firstSongFileName);
-                Callable<String> callable = new SongImageSearcher(firstSongInfo);
-                Future<String> future = mExecutor.submit(callable);
-
-                String albumImageUrl = null;
-                try {
-                    albumImageUrl = future.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
+//                Callable<String> callable = new SongImageSearcher(firstSongInfo);
+//                Future<String> future = mExecutor.submit(callable);
+//
+//                String albumImageUrl = null;
+//                try {
+//                    albumImageUrl = future.get();
+//                } catch (InterruptedException | ExecutionException e) {
+//                    e.printStackTrace();
+//                }
 
                 String albumName = firstSongInfo.album;
-                Album album = new Album(albumName, albumPath, albumImageUrl);
+                Album album = new Album(albumName, albumPath, MusicUtils.getNextCover());
                 ArrayList<Song> songs = new ArrayList<>();
                 for(int i = 0; i < songsInfo.size(); ++i) {
                     MusicUtils.SongInfo songInfo = songsInfo.get(i);
                     String songName = songInfo.title;
                     String songPath = albumPath + songsFileName.get(i);
-                    Song song = new Song(songName, songPath, albumImageUrl, album.getId());
+                    String albumCover = MusicUtils.getNextCover();
+                    Song song = new Song(songName, songPath, albumCover, album.getId());
                     songs.add(song);
                 }
                 mRepository.saveAlbum(album, songs);

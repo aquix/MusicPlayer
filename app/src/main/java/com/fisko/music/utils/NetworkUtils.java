@@ -15,7 +15,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class NetworkUtils {
+public final class NetworkUtils {
 
     private static final String LAST_FM_API_KEY = "";
 

@@ -108,14 +108,25 @@ public class MusicRepository implements MusicDataSource {
         }
 
         if (mCachedSongs != null) {
-            for(String songId: mCachedSongs.keySet()) {
-                if (mCachedSongs.containsKey(songId)) {
-                    mCachedSongs.remove(songId);
+            for(Song song: mCachedSongs.values()) {
+                if (album.getId().equals(song.getAlbumId())) {
+                    mCachedSongs.remove(song.getId());
                 }
             }
         }
 
         notifyAlbumsChanged();
+    }
+
+    @Override
+    public void deleteSong(@NonNull Song song) {
+        mTablesLocalDataSource.deleteSong(song);
+
+        if (mCachedSongs != null) {
+            if (mCachedSongs.containsKey(song.getId())) {
+                mCachedSongs.remove(song.getId());
+            }
+        }
     }
 
     @NonNull

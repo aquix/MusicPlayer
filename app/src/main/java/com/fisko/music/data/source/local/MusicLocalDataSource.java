@@ -79,6 +79,13 @@ public class MusicLocalDataSource implements MusicDataSource {
         removeSongs(album);
     }
 
+    @Override
+    public void deleteSong(@NonNull Song song) {
+        String selection = SongEntry.COLUMN_NAME_ENTRY_ID + " LIKE ?";
+        String[] selectionArgs = {song.getId()};
+        mDb.delete(SongEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
     private void removeSongs(@NonNull Album album) {
         String selection = SongEntry.COLUMN_NAME_ALBUM_ID + " LIKE ?";
         String[] selectionArgs = {album.getId()};
