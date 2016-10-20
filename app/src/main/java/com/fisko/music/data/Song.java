@@ -13,17 +13,19 @@ public class Song implements Parcelable {
     private String mName;
     private String mPath;
     private String mImagePath;
+    private int mDuration;
     private String mAlbumId;
 
-    public Song(String name, String path, String imagePath, String albumId) {
-        this(UUID.randomUUID().toString(), name, path, imagePath, albumId);
+    public Song(String name, String path, String imagePath, int duration, String albumId) {
+        this(UUID.randomUUID().toString(), name, path, imagePath, duration, albumId);
     }
 
-    public Song(String id, String name, String path, String imagePath, String albumId) {
+    public Song(String id, String name, String path, String imagePath, int duration, String albumId) {
         mId = id;
         mName = name;
         mPath = path;
         mImagePath = imagePath;
+        mDuration = duration;
         mAlbumId = albumId;
     }
 
@@ -32,6 +34,7 @@ public class Song implements Parcelable {
         mName = parcel.readString();
         mPath = parcel.readString();
         mImagePath = parcel.readString();
+        mDuration = parcel.readInt();
         mAlbumId = parcel.readString();
     }
 
@@ -51,6 +54,10 @@ public class Song implements Parcelable {
         return  mAlbumId;
     }
 
+    public int getDuration() {
+        return  mDuration;
+    }
+
     public String getImagePath() {
         return  mImagePath;
     }
@@ -66,6 +73,7 @@ public class Song implements Parcelable {
         parcel.writeString(mName);
         parcel.writeString(mPath);
         parcel.writeString(mImagePath);
+        parcel.writeInt(mDuration);
         parcel.writeString(mAlbumId);
     }
 
@@ -92,6 +100,7 @@ public class Song implements Parcelable {
                 Objects.equal(mName, song.getName()) &&
                 Objects.equal(mPath, song.getPath()) &&
                 Objects.equal(mImagePath, song.getImagePath()) &&
+                Objects.equal(mDuration, song.getDuration()) &&
                 Objects.equal(mAlbumId, song.getAlbumId());
     }
 

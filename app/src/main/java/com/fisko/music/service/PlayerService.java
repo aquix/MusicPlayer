@@ -71,8 +71,12 @@ public class PlayerService extends Service implements
     }
 
     private void notifyCallbacks() {
-        float seekPos = (float) mMediaPlayer.getDuration() / mMediaPlayer.getCurrentPosition();
-        boolean isPlaying = mMediaPlayer.isPlaying();
+        float seekPos = 0;
+        boolean isPlaying = false;
+        if (mMediaPlayer != null) {
+            seekPos = (float) mMediaPlayer.getDuration() / mMediaPlayer.getCurrentPosition();
+            isPlaying = mMediaPlayer.isPlaying();
+        }
         for(PlayerCallback callback: mCallbacks) {
             callback.OnSongInfoChanged(seekPos, mSongIndex, mAlbumId, isPlaying);
         }

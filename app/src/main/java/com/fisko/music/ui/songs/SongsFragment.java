@@ -7,6 +7,10 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -17,6 +21,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 
 import com.fisko.music.R;
+import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
 import com.fisko.music.data.source.MusicDataSource;
 import com.fisko.music.data.source.MusicRepository;
@@ -25,12 +30,11 @@ import com.fisko.music.service.PlayerService;
 import com.fisko.music.utils.Constants;
 import com.fisko.music.utils.UIUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SongsFragment extends Fragment implements PlayerService.PlayerCallback {
 
-    private String mAlbumId;
+    private Album mAlbum;
 
     private SongsListAdapter mAdapter;
     private MusicRepository mRepository;
@@ -45,10 +49,10 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         mPlayingSongId = -1;
     }
 
-    public static SongsFragment newInstance(String albumId, Song openedSong) {
+    public static SongsFragment newInstance(Album album, Song openedSong) {
         SongsFragment fragment = new SongsFragment();
         Bundle args = new Bundle();
-        args.putString(Constants.ALBUM_BUNDLE.ALBUM_ID, albumId);
+        args.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, album);
         args.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, openedSong);
         fragment.setArguments(args);
         return fragment;
@@ -59,7 +63,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         super.onCreate(savedInstanceState);
         Song openedSong = null;
         if (getArguments() != null) {
-            mAlbumId = getArguments().getString(Constants.ALBUM_BUNDLE.ALBUM_ID);
+            mAlbum = getArguments().getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
             openedSong = getArguments().getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
 
@@ -67,7 +71,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         mRepository = MusicRepository.getInstance(localDataSource);
 
         if(openedSong != null) {
-            List<Song> songs = mRepository.getSongs(mAlbumId);
+            List<Song> songs = mRepository.getSongs(mAlbum.getId());
             UIUtils.openSongPlayer(openedSong, songs, getActivity());
         }
     }
@@ -75,24 +79,43 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view  = inflater.inflate(R.layout.song_fragment, container, false);
+        View view  = inflater.inflate(R.layout.songs_fragment, container, false);
+        setUpToolbar();
 
         ListView albumsList = (ListView) view.findViewById(R.id.songs_list);
-        mAdapter = new SongsListAdapter(getActivity());
+        mAdapter = new SongsListAdapter(mAlbum, getActivity());
         albumsList.setAdapter(mAdapter);
         loadAlbums();
 
         return view;
     }
 
+    private void setUpToolbar() {
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.setTitle(mAlbum.getName());
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+    }
+
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(Constants.ALBUM_BUNDLE.ALBUM_ID, mAlbumId);
+        outState.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, mAlbum);
     }
 
     private void loadAlbums() {
-        mSongs = mRepository.getSongs(mAlbumId);
+        mSongs = mRepository.getSongs(mAlbum.getId());
         mAdapter.replaceData(mSongs);
     }
 

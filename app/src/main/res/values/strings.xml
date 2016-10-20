@@ -12,4 +12,5 @@
     <string name="albums">Albums</string>
     <string name="remove">Remove</string>
     <string name="current_playing">Current playing</string>
+    <string name="read_storage_not_granted">Storage permission not granted!</string>
 </resources>

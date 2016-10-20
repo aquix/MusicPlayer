@@ -271,6 +271,7 @@ public class HeaderGridView extends GridView {
             }
             return false;
         }
+
         @Override
         public int getCount() {
             if (mAdapter != null) {
@@ -279,10 +280,12 @@ public class HeaderGridView extends GridView {
                 return getHeadersCount() * mNumColumns;
             }
         }
+
         @Override
         public boolean areAllItemsEnabled() {
             return mAdapter == null || mAreAllFixedViewsSelectable && mAdapter.areAllItemsEnabled();
         }
+
         @Override
         public boolean isEnabled(int position) {
             // Header (negative positions will throw an ArrayIndexOutOfBoundsException)
@@ -302,6 +305,7 @@ public class HeaderGridView extends GridView {
             }
             throw new ArrayIndexOutOfBoundsException(position);
         }
+
         @Override
         public Object getItem(int position) {
             // Header (negative positions will throw an ArrayIndexOutOfBoundsException)
@@ -323,6 +327,7 @@ public class HeaderGridView extends GridView {
             }
             throw new ArrayIndexOutOfBoundsException(position);
         }
+
         @Override
         public long getItemId(int position) {
             int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
@@ -335,13 +340,14 @@ public class HeaderGridView extends GridView {
             }
             return -1;
         }
+
         @Override
         public boolean hasStableIds() {
             return mAdapter != null && mAdapter.hasStableIds();
         }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            // Header (negative positions will throw an ArrayIndexOutOfBoundsException)
             int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns ;
             if (position < numHeadersAndPlaceholders) {
                 View headerViewContainer = mHeaderViewInfos
@@ -352,14 +358,13 @@ public class HeaderGridView extends GridView {
                     if (convertView == null) {
                         convertView = new View(parent.getContext());
                     }
-                    // We need to do this because GridView uses the height of the last item
-                    // in a row to determine the height for the entire row.
+
                     convertView.setVisibility(View.INVISIBLE);
                     convertView.setMinimumHeight(headerViewContainer.getHeight());
                     return convertView;
                 }
             }
-            // Adapter
+
             final int adjPosition = position - numHeadersAndPlaceholders;
             int adapterCount;
             if (mAdapter != null) {
@@ -370,11 +375,11 @@ public class HeaderGridView extends GridView {
             }
             throw new ArrayIndexOutOfBoundsException(position);
         }
+
         @Override
         public int getItemViewType(int position) {
             int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
             if (position < numHeadersAndPlaceholders && (position % mNumColumns != 0)) {
-                // Placeholders get the last view type number
                 return mAdapter != null ? mAdapter.getViewTypeCount() : 1;
             }
             if (mAdapter != null && position >= numHeadersAndPlaceholders) {

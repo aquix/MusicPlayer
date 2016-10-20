@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MusicDataSource {
 
-    void saveAlbum(@NonNull Album album, @NonNull List<Song> songs);
+    boolean saveAlbum(@NonNull Album album, @NonNull List<Song> songs);
 
     void saveSongs(@NonNull List<Song> songs);
 

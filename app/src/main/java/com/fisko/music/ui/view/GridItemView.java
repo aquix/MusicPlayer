@@ -1,7 +1,6 @@
 package com.fisko.music.ui.view;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.util.AttributeSet;
@@ -40,7 +39,8 @@ public class GridItemView extends ImageView {
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int footerHeight = (int) getResources().getDimension(R.dimen.grid_item_footer_height);
+        int footerHeight = 0;
+//        int footerHeight = (int) getResources().getDimension(R.dimen.grid_item_footer_height);
 //        int height = widthMeasureSpec + footerHeight;
 //        super.onMeasure(widthMeasureSpec, height);
 
@@ -90,7 +90,7 @@ public class GridItemView extends ImageView {
         }
 
         setImageMatrix(mMatrix);
-        return true;
+        return false;
     }
 
     /** Determine the space between the first two fingers */

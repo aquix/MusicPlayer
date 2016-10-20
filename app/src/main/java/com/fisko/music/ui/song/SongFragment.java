@@ -13,7 +13,9 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +41,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     private ArrayList<Song> mSongs;
     private boolean isPlaying;
 
-    private ActionBar mToolbar;
+    private Toolbar mToolbar;
 
     public SongFragment() {}
 
@@ -65,8 +67,8 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.song_fragment, container, false);
+        setUpToolbar();
 
-        mToolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         mSongPager = (ViewPager) view.findViewById(R.id.song_pager);
         PagerAdapter pagerAdapter = new SongPagerAdapter(mSongs, getFragmentManager());
         mSongPager.setAdapter(pagerAdapter);
@@ -77,6 +79,8 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         View prevButton = view.findViewById(R.id.prev_song_button);
         View nextButton = view.findViewById(R.id.next_song_button);
         mPlayButton = (ImageView) view.findViewById(R.id.player_control);
+
+        setSongData();
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,12 +94,6 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
                 playAnotherSong(1);
             }
         });
-//        mPlayButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                playAnotherSong(0);
-//            }
-//        });
         mPlayButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -110,13 +108,30 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
 
         mSongPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
                 mSongIndex = position;
                 setSongData();
             }
         });
 
         return view;
+    }
+
+    private void setUpToolbar() {
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
+        mToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
     }
 
     @Override
@@ -132,13 +147,13 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             mToolbar.setTitle(songName);
         }
 
-        Drawable drawable;
+        int playImageResource;
         if(isPlaying) {
-            drawable = ContextCompat.getDrawable(getContext(), android.R.drawable.ic_media_play);
+            playImageResource = android.R.drawable.ic_media_pause;
         } else {
-            drawable = ContextCompat.getDrawable(getContext(), android.R.drawable.ic_media_pause);
+            playImageResource = android.R.drawable.ic_media_play;
         }
-        mPlayButton.setImageDrawable(drawable);
+        mPlayButton.setImageResource(playImageResource);
     }
 
     public void playAnotherSong(int offset) {

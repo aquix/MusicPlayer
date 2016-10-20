@@ -4,7 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -34,8 +36,12 @@ public class AlbumsFragment extends Fragment implements
         MusicRepository.AlbumsRepositoryObserver,
         PlayerService.PlayerCallback {
 
+    private static final int PORTRAIT_COLUMNS_COUNT = 2;
+    private static final int LANDSCAPE_COLUMNS_COUNT = 3;
+
     private AlbumsListAdapter mAdapter;
     private MusicRepository mRepository;
+    private Handler mMainHandler;
 
     private PlayerService mService;
     private boolean mBound = false;
@@ -62,11 +68,13 @@ public class AlbumsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.albums_fragment, container, false);
 
-
         HeaderGridView albumsGrid = (HeaderGridView) view.findViewById(R.id.albums_grid);
+        setColumnsCount(albumsGrid);
         mAdapter = new AlbumsListAdapter(getActivity());
         albumsGrid.setAdapter(mAdapter);
         loadAlbums();
+
+        mMainHandler = new Handler(getContext().getMainLooper());
 
         List<Song> recentSongs = MusicUtils.getRecent();
         if(!recentSongs.isEmpty()) {
@@ -89,9 +97,23 @@ public class AlbumsFragment extends Fragment implements
         mAdapter.replaceData(mAlbums);
     }
 
+    private void setColumnsCount(HeaderGridView albumsGrid) {
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+            albumsGrid.setNumColumns(PORTRAIT_COLUMNS_COUNT);
+        } else {
+            albumsGrid.setNumColumns(LANDSCAPE_COLUMNS_COUNT);
+        }
+    }
+
     @Override
     public void onAlbumsChanged() {
-        loadAlbums();
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                loadAlbums();
+            }
+        });
     }
 
     @Override
@@ -136,7 +158,7 @@ public class AlbumsFragment extends Fragment implements
 
     @Override
     public void OnSongInfoChanged(float seekPos, int songIndex, String albumId, boolean isPlaying) {
-        if(albumId.equals(mAlbumId)) {
+        if(albumId != null && albumId.equals(mAlbumId)) {
             mAlbumId = albumId;
             mAdapter.setPlayingAlbum(albumId);
         }

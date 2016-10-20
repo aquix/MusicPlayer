@@ -40,10 +40,6 @@ public class SearchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (!isSearchActive()) {
-            MusicSearcher searcher = new MusicSearcher();
-            new Thread(searcher).start();
-        }
         return START_NOT_STICKY;
     }
 
@@ -51,6 +47,13 @@ public class SearchService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    public void startMusicSearch() {
+        if (!isSearchActive()) {
+            MusicSearcher searcher = new MusicSearcher();
+            new Thread(searcher).start();
+        }
     }
 
 
@@ -83,40 +86,47 @@ public class SearchService extends Service {
 //            }
 //        }
 
-        @Override
-        public void run() {
-            String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            File searchStart = new File(sdPath);
-            if (!searchStart.exists() && !searchStart.isDirectory()) {
-                return;
-            }
-
-            final HashMap<String, List<String>> music = new HashMap<>();
-            File[] ignored = searchStart.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    if (name.endsWith("mp3")) {
-                        String dirPath = dir.getAbsolutePath();
+        private void iterateFiles(File[] files, HashMap<String, List<String>> music) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    iterateFiles(file.listFiles(), music);
+                } else {
+                    String name = file.getName();
+                    if (name.endsWith(".mp3")) {
+                        String dirPath = file.getParent();
                         if (!music.containsKey(dirPath)) {
                             music.put(dirPath, new LinkedList<String>());
                         }
                         List<String> songNames = music.get(dirPath);
                         songNames.add(name);
                     }
-                    return false;
                 }
-            });
+            }
+        }
+
+        @Override
+        public void run() {
+            File musicFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+            String musicFolderPath = musicFolder.getAbsolutePath();
+            File searchStart = new File(musicFolderPath);
+            if (!searchStart.exists() && !searchStart.isDirectory()) {
+                return;
+            }
+
+            final HashMap<String, List<String>> music = new HashMap<>();
+            iterateFiles(searchStart.listFiles(), music);
 
             for(String albumPath: music.keySet()) {
                 ArrayList<MusicUtils.SongInfo> songsInfo = new ArrayList<>();
                 List<String> songsFileName = music.get(albumPath);
                 for(String songFileName: songsFileName) {
-                    String songPath = albumPath + songFileName;
+                    String songPath = albumPath + '/' + songFileName;
                     MusicUtils.SongInfo songInfo = MusicUtils.extractSongInfo(songPath);
                     songsInfo.add(songInfo);
                 }
 
-                String firstSongFileName = albumPath + songsFileName.get(0);
-                MusicUtils.SongInfo firstSongInfo = MusicUtils.extractSongInfo(firstSongFileName);
+                MusicUtils.SongInfo firstSongInfo = songsInfo.get(0);
+
 //                Callable<String> callable = new SongImageSearcher(firstSongInfo);
 //                Future<String> future = mExecutor.submit(callable);
 //
@@ -128,14 +138,15 @@ public class SearchService extends Service {
 //                }
 
                 String albumName = firstSongInfo.album;
-                Album album = new Album(albumName, albumPath, MusicUtils.getNextCover());
+                String albumArtist = firstSongInfo.artist;
+                Album album = new Album(albumName, albumArtist, albumPath, MusicUtils.getNextCover());
                 ArrayList<Song> songs = new ArrayList<>();
                 for(int i = 0; i < songsInfo.size(); ++i) {
                     MusicUtils.SongInfo songInfo = songsInfo.get(i);
                     String songName = songInfo.title;
                     String songPath = albumPath + songsFileName.get(i);
                     String albumCover = MusicUtils.getNextCover();
-                    Song song = new Song(songName, songPath, albumCover, album.getId());
+                    Song song = new Song(songName, songPath, albumCover, songInfo.duration, album.getId());
                     songs.add(song);
                 }
                 mRepository.saveAlbum(album, songs);

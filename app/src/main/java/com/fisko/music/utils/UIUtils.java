@@ -21,7 +21,7 @@ public final class UIUtils {
             songFragment = SongFragment.newInstance(songs.indexOf(song), (ArrayList<Song>) songs);
             FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
             transaction.addToBackStack(Constants.SONG_FRAGMENT_TAG)
-                    .add(R.id.content_frame, songFragment);
+                    .replace(R.id.content_frame, songFragment);
             transaction.commit();
         }
     }

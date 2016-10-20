@@ -56,6 +56,7 @@ class AlbumsListAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         TextView albumName;
+        TextView albumArtist;
         ImageView playingIndicator;
         ImageView albumCover;
     }
@@ -75,6 +76,7 @@ class AlbumsListAdapter extends BaseAdapter {
             holder = new ViewHolder();
 
             holder.albumName = (TextView) view.findViewById(R.id.album_name);
+            holder.albumArtist = (TextView) view.findViewById(R.id.album_artist);
             holder.playingIndicator = (ImageView) view.findViewById(R.id.album_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.album_cover);
 
@@ -103,12 +105,13 @@ class AlbumsListAdapter extends BaseAdapter {
 
     private void openAlbum(Album album) {
         Intent intent = new Intent(mActivity, SongsActivity.class);
-        intent.putExtra(Constants.ALBUM_BUNDLE.ALBUM_ID, album.getId());
+        intent.putExtra(Constants.ALBUM_BUNDLE.ALBUM, album);
         mActivity.startActivity(intent);
     }
 
     private void fillHolder(ViewHolder holder, Album album) {
         holder.albumName.setText(album.getName());
+        holder.albumArtist.setText(album.getArtist());
         if(album.getId().equals(mPlayingAlbumId)) {
             Drawable drawable = ContextCompat.getDrawable(mActivity, R.drawable.playing_indicator);
             holder.playingIndicator.setImageDrawable(drawable);

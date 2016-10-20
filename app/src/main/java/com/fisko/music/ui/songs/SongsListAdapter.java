@@ -12,25 +12,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fisko.music.R;
+import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
 import com.fisko.music.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 class SongsListAdapter extends BaseAdapter {
 
     private FragmentActivity mActivity;
     private LayoutInflater mInflater;
     private ArrayList<Song> mSongs;
+    private Album mAlbum;
     private int mPlayingSongIndex;
 
 
-    SongsListAdapter(Activity activity) {
-        mInflater = LayoutInflater.from(activity);
-        mSongs = new ArrayList<>();
+    SongsListAdapter(Album album, Activity activity) {
         mActivity = (FragmentActivity) activity;
+        mInflater = LayoutInflater.from(activity);
+        mAlbum = album;
+        mSongs = new ArrayList<>();
+        mPlayingSongIndex = -1;
     }
 
     void replaceData(List<Song> songs) {
@@ -55,6 +60,8 @@ class SongsListAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         TextView songName;
+        TextView songArtist;
+        TextView songDuration;
         ImageView playingIndicator;
         ImageView albumCover;
     }
@@ -77,7 +84,9 @@ class SongsListAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.songs_list_item, parent, false);
             holder = new ViewHolder();
 
-            holder.songName = (TextView) view.findViewById(R.id.album_name);
+            holder.songName = (TextView) view.findViewById(R.id.song_name);
+            holder.songArtist = (TextView) view.findViewById(R.id.song_artist);
+            holder.songDuration = (TextView) view.findViewById(R.id.song_duration);
             holder.playingIndicator = (ImageView) view.findViewById(R.id.song_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.song_image);
 
@@ -99,8 +108,17 @@ class SongsListAdapter extends BaseAdapter {
         return view;
     }
 
+    private String formatDuration(int durationMs) {
+        int seconds = durationMs / 1000;
+        int minutes = seconds / 60;
+        seconds %= 60;
+        return String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
+    }
+
     private void fillHolder(ViewHolder holder, Song song, int songIndex) {
         holder.songName.setText(song.getName());
+        holder.songArtist.setText(mAlbum.getArtist());
+        holder.songDuration.setText(formatDuration(song.getDuration()));
         if(songIndex == mPlayingSongIndex) {
             Drawable drawable = ContextCompat.getDrawable(mActivity, R.drawable.playing_indicator);
             holder.playingIndicator.setImageDrawable(drawable);

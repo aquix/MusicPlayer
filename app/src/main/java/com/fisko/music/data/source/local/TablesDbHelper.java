@@ -18,9 +18,11 @@ package com.fisko.music.data.source.local;/*
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import com.fisko.music.data.source.local.TablesPersistenceContract.AlbumEntry;
+import com.fisko.music.data.source.local.TablesPersistenceContract.SongEntry;
 
 class TablesDbHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 15;
 
     private static final String DATABASE_NAME = "music.db";
 
@@ -29,21 +31,24 @@ class TablesDbHelper extends SQLiteOpenHelper {
 
     private static final String COMMA_SEP = ",";
 
-    private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + TablesPersistenceContract.AlbumEntry.TABLE_NAME + " (" +
-                    TablesPersistenceContract.AlbumEntry._ID + TEXT_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    TablesPersistenceContract.AlbumEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.AlbumEntry.COLUMN_NAME_ALBUM_NAME + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.AlbumEntry.COLUMN_NAME_ALBUM_IMAGE + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.AlbumEntry.COLUMN_NAME_ALBUM_PATH + TEXT_TYPE +
-            " );" +
-            "CREATE TABLE " + TablesPersistenceContract.SongEntry.TABLE_NAME + " (" +
-                    TablesPersistenceContract.SongEntry._ID + INTEGER_TYPE + " PRIMARY KEY" + COMMA_SEP +
-                    TablesPersistenceContract.SongEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.SongEntry.COLUMN_NAME_ALBUM_ID + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.SongEntry.COLUMN_NAME_SONG_NAME + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.SongEntry.COLUMN_NAME_SONG_IMAGE + TEXT_TYPE + COMMA_SEP +
-                    TablesPersistenceContract.SongEntry.COLUMN_NAME_SONG_PATH + TEXT_TYPE +
+    private static final String SQL_CREATE_TABLE_ALBUMS =
+            "CREATE TABLE " + AlbumEntry.TABLE_NAME + " (" +
+                    AlbumEntry._ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT NOT NULL" + COMMA_SEP +
+                    AlbumEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+                    AlbumEntry.COLUMN_NAME_ALBUM_NAME + TEXT_TYPE + COMMA_SEP +
+                    AlbumEntry.COLUMN_NAME_ALBUM_ARTIST + TEXT_TYPE + COMMA_SEP +
+                    AlbumEntry.COLUMN_NAME_ALBUM_IMAGE + TEXT_TYPE + COMMA_SEP +
+                    AlbumEntry.COLUMN_NAME_ALBUM_PATH + TEXT_TYPE +
+            " );";
+    private static final String SQL_CREATE_TABLE_SONGS =
+            "CREATE TABLE " + SongEntry.TABLE_NAME + " (" +
+                    SongEntry._ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT NOT NULL" + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_ENTRY_ID + TEXT_TYPE + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_ALBUM_ID + TEXT_TYPE + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_SONG_NAME + TEXT_TYPE + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_SONG_IMAGE + TEXT_TYPE + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_SONG_DURATION + INTEGER_TYPE + COMMA_SEP +
+                    SongEntry.COLUMN_NAME_SONG_PATH + TEXT_TYPE +
             " );";
 
     TablesDbHelper(Context context) {
@@ -51,11 +56,15 @@ class TablesDbHelper extends SQLiteOpenHelper {
     }
 
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_TABLE_ALBUMS);
+        db.execSQL(SQL_CREATE_TABLE_SONGS);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Not required as at version 1
+        db.execSQL("DROP TABLE IF EXISTS " + SongEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + AlbumEntry.TABLE_NAME);
+        db.execSQL(SQL_CREATE_TABLE_ALBUMS);
+        db.execSQL(SQL_CREATE_TABLE_SONGS);
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

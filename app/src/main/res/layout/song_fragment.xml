@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fisko.music.ui.songs.SongsFragment"
+    android:background="@color/white"
     android:orientation="vertical">
 
     <android.support.v4.view.ViewPager
@@ -23,7 +24,7 @@
             android:background="@android:drawable/ic_media_play"
             android:contentDescription="@string/media_control"
             android:layout_centerInParent="true"
-            android:layout_margin="30dp"/>
+            android:layout_margin="30dp" />
 
         <ImageButton
             android:layout_width="60dp"
@@ -33,7 +34,7 @@
             android:contentDescription="@string/media_previous"
             android:layout_toLeftOf="@id/player_control"
             android:layout_toStartOf="@id/player_control"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true" />
 
         <ImageButton
             android:layout_width="60dp"
@@ -43,7 +44,7 @@
             android:contentDescription="@string/media_previous"
             android:layout_toRightOf="@id/player_control"
             android:layout_toEndOf="@id/player_control"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true" />
 
     </RelativeLayout>
 

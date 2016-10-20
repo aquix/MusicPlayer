@@ -6,6 +6,7 @@ import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,16 +74,18 @@ public class MusicRepository implements MusicDataSource {
     }
 
     @Override
-    public void saveAlbum(@NonNull Album album, @NonNull List<Song> songs) {
+    public boolean saveAlbum(@NonNull Album album, @NonNull List<Song> songs) {
         saveSongs(songs);
-
-        mTablesLocalDataSource.saveAlbum(album, songs);
         if (mCachedAlbums == null) {
             mCachedAlbums = new LinkedHashMap<>();
         }
         mCachedAlbums.put(album.getId(), album);
 
-        notifyAlbumsChanged();
+        boolean successState = mTablesLocalDataSource.saveAlbum(album, songs);
+        if (successState) {
+            notifyAlbumsChanged();
+        }
+        return successState;
     }
 
     @Override
@@ -154,6 +157,7 @@ public class MusicRepository implements MusicDataSource {
             return getCachedSongs(albumId);
         } else {
             List<Album> albums = mTablesLocalDataSource.getAlbums();
+            mCachedSongs = new LinkedHashMap<>();
             for(Album nextAlbum: albums) {
                 for(Song nextSong: mTablesLocalDataSource.getSongs(nextAlbum.getId())) {
                     mCachedSongs.put(nextSong.getId(), nextSong);

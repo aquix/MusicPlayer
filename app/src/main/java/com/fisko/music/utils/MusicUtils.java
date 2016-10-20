@@ -2,9 +2,14 @@ package com.fisko.music.utils;
 
 import android.media.FaceDetector;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
 
 import com.fisko.music.data.Song;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -68,19 +73,42 @@ public final class MusicUtils {
     }
 
     static public class SongInfo {
-        String artist;
+        public String artist;
         public String album;
         public String title;
+        public int duration;
     }
 
+    private static SongInfo getEmptySongInfo() {
+        SongInfo emptyInfo = new SongInfo();
+        emptyInfo.artist = "Unknown";
+        emptyInfo.album = "Unknown";
+        emptyInfo.title = "Unknown";
+        emptyInfo.duration = 0;
+        return emptyInfo;
+    }
 
     public static SongInfo extractSongInfo(String songPath) {
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream(songPath);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return getEmptySongInfo();
+        }
         MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-        metaRetriever.setDataSource(songPath);
+        try {
+            metaRetriever.setDataSource(inputStream.getFD());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return getEmptySongInfo();
+        }
         SongInfo songInfo = new SongInfo();
-        songInfo.artist =  metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        songInfo.album =  metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        songInfo.title =  metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        songInfo.artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        songInfo.album = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        songInfo.title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        String duration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        songInfo.duration = Integer.parseInt(duration);
         return songInfo;
     }
 

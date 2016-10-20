@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -7,8 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/album_cover"
-        android:contentDescription="@string/playing_state"
-        android:layout_marginBottom="@dimen/grid_item_footer_height"/>
+        android:contentDescription="@string/playing_state"/>
 
     <ImageView
         android:layout_width="20dp"
@@ -21,14 +20,27 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/album_name"
+        android:layout_height="20dp"
+        android:id="@+id/album_artist"
+        android:layout_below="@id/album_cover"
         android:layout_marginRight="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
-        android:layout_marginBottom="8dp"
-        android:layout_gravity="bottom"
-        android:textSize="20sp" />
+        android:layout_marginTop="5dp"
+        android:gravity="center_horizontal"
+        android:textSize="15sp" />
 
-</FrameLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:id="@+id/album_name"
+        android:layout_below="@id/album_artist"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center_horizontal"
+        android:textSize="16sp" />
+
+</RelativeLayout>

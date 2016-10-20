@@ -9,7 +9,7 @@ public final class Constants {
     }
 
     public static final class ALBUM_BUNDLE {
-        public static final String ALBUM_ID = "ALBUM_ID";
+        public static final String ALBUM = "ALBUM";
     }
 
     static final String SONG_FRAGMENT_TAG = "SONG_FRAGMENT_TAG";
