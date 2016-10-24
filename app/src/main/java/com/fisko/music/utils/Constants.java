@@ -13,5 +13,6 @@ public final class Constants {
     }
 
     static final String SONG_FRAGMENT_TAG = "SONG_FRAGMENT_TAG";
+    public static final String SONGS_FRAGMENT_TAG = "SONGS_FRAGMENT_TAG";
 
 }

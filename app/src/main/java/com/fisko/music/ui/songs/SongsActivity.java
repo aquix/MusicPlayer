@@ -24,6 +24,7 @@ public class SongsActivity extends AppCompatActivity {
         Song openedSong = null;
         if (bundle != null) {
             album = bundle.getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
+            openedSong = bundle.getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
         if (savedInstanceState != null) {
             album = savedInstanceState.getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
@@ -31,11 +32,11 @@ public class SongsActivity extends AppCompatActivity {
         }
 
         SongsFragment songsFragment =
-                (SongsFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+                (SongsFragment) getSupportFragmentManager().findFragmentByTag(Constants.SONGS_FRAGMENT_TAG);
         if (songsFragment == null) {
             songsFragment = SongsFragment.newInstance(album, openedSong);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.content_frame, songsFragment);
+            transaction.add(R.id.content_frame, songsFragment, Constants.SONGS_FRAGMENT_TAG);
             transaction.commit();
         }
     }

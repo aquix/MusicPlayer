@@ -45,7 +45,6 @@ public class AlbumsFragment extends Fragment implements
 
     private PlayerService mService;
     private boolean mBound = false;
-    private String mAlbumId;
 
     private List<Album> mAlbums;
 
@@ -120,6 +119,7 @@ public class AlbumsFragment extends Fragment implements
     public void onStart() {
         super.onStart();
         Intent intent = new Intent(getActivity(), PlayerService.class);
+        getActivity().startService(intent);
         getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -156,12 +156,22 @@ public class AlbumsFragment extends Fragment implements
         return super.onContextItemSelected(item);
     }
 
-    @Override
-    public void OnSongInfoChanged(float seekPos, int songIndex, String albumId, boolean isPlaying) {
-        if(albumId != null && albumId.equals(mAlbumId)) {
-            mAlbumId = albumId;
-            mAdapter.setPlayingAlbum(albumId);
+    private void setActiveAlbum(boolean isPlaying, Song song) {
+        if (isPlaying) {
+            mAdapter.setPlayingAlbum(song.getAlbumId());
+        } else {
+            mAdapter.setPlayingAlbum(null);
         }
+    }
+
+    @Override
+    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+        setActiveAlbum(isPlaying, song);
+    }
+
+    @Override
+    public void onStateChanged(boolean isPlaying, Song song) {
+        setActiveAlbum(isPlaying, song);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -169,7 +179,6 @@ public class AlbumsFragment extends Fragment implements
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
             mService = binder.getService();
             mService.addPlayerListener(AlbumsFragment.this);

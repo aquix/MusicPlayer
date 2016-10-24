@@ -22,7 +22,7 @@ import com.fisko.music.data.source.local.TablesPersistenceContract.AlbumEntry;
 import com.fisko.music.data.source.local.TablesPersistenceContract.SongEntry;
 
 class TablesDbHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static final String DATABASE_NAME = "music.db";
 

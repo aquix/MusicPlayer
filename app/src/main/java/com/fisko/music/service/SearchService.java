@@ -144,7 +144,7 @@ public class SearchService extends Service {
                 for(int i = 0; i < songsInfo.size(); ++i) {
                     MusicUtils.SongInfo songInfo = songsInfo.get(i);
                     String songName = songInfo.title;
-                    String songPath = albumPath + songsFileName.get(i);
+                    String songPath = albumPath + '/' + songsFileName.get(i);
                     String albumCover = MusicUtils.getNextCover();
                     Song song = new Song(songName, songPath, albumCover, songInfo.duration, album.getId());
                     songs.add(song);

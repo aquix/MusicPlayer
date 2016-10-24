@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
@@ -43,11 +44,6 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
 
     private PlayerService mService;
     private boolean mBound = false;
-    private int mPlayingSongId;
-
-    public SongsFragment() {
-        mPlayingSongId = -1;
-    }
 
     public static SongsFragment newInstance(Album album, Song openedSong) {
         SongsFragment fragment = new SongsFragment();
@@ -69,18 +65,22 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
 
         MusicDataSource localDataSource = MusicLocalDataSource.getInstance(getContext());
         mRepository = MusicRepository.getInstance(localDataSource);
+        if(mAlbum == null && openedSong != null) {
+            mAlbum = mRepository.getAlbum(openedSong.getAlbumId());
+        }
 
         if(openedSong != null) {
             List<Song> songs = mRepository.getSongs(mAlbum.getId());
             UIUtils.openSongPlayer(openedSong, songs, getActivity());
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.songs_fragment, container, false);
-        setUpToolbar();
+        UIUtils.setUpToolbar(true, mAlbum.getName() ,(AppCompatActivity) getActivity());
 
         ListView albumsList = (ListView) view.findViewById(R.id.songs_list);
         mAdapter = new SongsListAdapter(mAlbum, getActivity());
@@ -89,24 +89,6 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
 
         return view;
     }
-
-    private void setUpToolbar() {
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
-
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.setTitle(mAlbum.getName());
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().finish();
-            }
-        });
-    }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -168,11 +150,23 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         return super.onContextItemSelected(item);
     }
 
-    @Override
-    public void OnSongInfoChanged(float seekPos, int songIndex, String albumId, boolean isPlaying) {
-        if (songIndex != mPlayingSongId) {
-            mAdapter.setPlayingSong(mPlayingSongId);
+    private void setPlayingSong(boolean isPlaying, Song song) {
+        if (isPlaying) {
+            int songIndex = mSongs.indexOf(song);
+            mAdapter.setPlayingSong(songIndex);
+        } else {
+            mAdapter.setPlayingSong(SongsListAdapter.INDEX_NOT_INIT);
         }
+    }
+
+    @Override
+    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+        setPlayingSong(isPlaying, song);
+    }
+
+    @Override
+    public void onStateChanged(boolean isPlaying, Song song) {
+        setPlayingSong(isPlaying, song);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

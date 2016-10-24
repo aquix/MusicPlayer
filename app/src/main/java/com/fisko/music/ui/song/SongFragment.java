@@ -4,18 +4,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +22,8 @@ import com.fisko.music.R;
 import com.fisko.music.data.Song;
 import com.fisko.music.service.PlayerService;
 import com.fisko.music.utils.Constants;
+import com.fisko.music.utils.MathUtils;
+import com.fisko.music.utils.UIUtils;
 
 import java.util.ArrayList;
 
@@ -67,7 +66,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.song_fragment, container, false);
-        setUpToolbar();
+        mToolbar = UIUtils.setUpToolbar(false, null, (AppCompatActivity) getActivity());
 
         mSongPager = (ViewPager) view.findViewById(R.id.song_pager);
         PagerAdapter pagerAdapter = new SongPagerAdapter(mSongs, getFragmentManager());
@@ -110,38 +109,26 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                mSongIndex = position;
-                setSongData();
+                if(position != mSongIndex) {
+                    playAnotherSong(position - mSongIndex);
+                }
             }
         });
 
         return view;
     }
 
-    private void setUpToolbar() {
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
-
-        mToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
-        });
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putInt(Constants.SONG_BUNDLE.CURRENT_SONG_INDEX, mSongIndex);
         outState.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, mSongs.get(mSongIndex));
     }
 
     private void setSongData() {
-        mSongPager.setCurrentItem(mSongIndex, true);
+        if (mSongPager.getCurrentItem() != mSongIndex) {
+            mSongPager.setCurrentItem(mSongIndex, true);
+        }
         String songName = mSongs.get(mSongIndex).getName();
         if (mToolbar != null) {
             mToolbar.setTitle(songName);
@@ -157,20 +144,27 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     }
 
     public void playAnotherSong(int offset) {
-        if (offset != 0) {
-            mSongIndex = (mSongIndex + offset) % mSongs.size();
-            if(isPlaying) {
-                mService.play(mSongIndex, mSongs);
-            }
-        } else {
+        if (offset == 0) {
             if(isPlaying) {
                 mService.pause();
             } else {
                 mService.play(mSongIndex, mSongs);
             }
             isPlaying = !isPlaying;
+        } else {
+            mSongIndex = MathUtils.getPositiveModule(mSongIndex + offset, mSongs.size());
+            if(isPlaying) {
+                mService.play(mSongIndex, mSongs);
+            } else {
+                mService.pause();
+            }
         }
 
+        setSongData();
+    }
+
+    private void playSong() {
+        mService.play(mSongIndex, mSongs);
         setSongData();
     }
 
@@ -187,7 +181,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
-                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP:
                         endX = event.getX();
                         if(Math.abs(endX - startX) > swipeMinLen) {
                             if (startX > endX) {
@@ -230,6 +224,29 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         }
     }
 
+    @Override
+    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+        Song curSong = mSongs.get(mSongIndex);
+        this.isPlaying = isPlaying;
+
+        if (curSong.equals(song)) {
+
+        } else {
+            if (isPlaying ) {
+                playSong();
+            }
+        }
+
+        setSongData();
+    }
+
+    @Override
+    public void onStateChanged(boolean isPlaying, Song song) {
+        mSongIndex = mSongs.indexOf(song);
+        this.isPlaying = isPlaying;
+        setSongData();
+    }
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
@@ -247,12 +264,4 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         }
     };
 
-    @Override
-    public void OnSongInfoChanged(float seekPos, int songIndex, String albumId, boolean isPlaying) {
-        if (songIndex != mSongIndex || isPlaying != this.isPlaying) {
-            mSongIndex = songIndex;
-            this.isPlaying = isPlaying;
-            setSongData();
-        }
-    }
 }

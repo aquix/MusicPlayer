@@ -4,6 +4,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.fisko.music.R;
 import com.fisko.music.data.Song;
@@ -24,6 +28,29 @@ public final class UIUtils {
                     .replace(R.id.content_frame, songFragment);
             transaction.commit();
         }
+    }
+
+    public static Toolbar setUpToolbar(final boolean isFinishActivity, String title, final AppCompatActivity activity) {
+        ActionBar actionBar = activity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
+        activity.setSupportActionBar(toolbar);
+        toolbar.setTitle(title);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isFinishActivity) {
+                    activity.finish();
+                } else {
+                    activity.getSupportFragmentManager().popBackStack();
+                }
+            }
+        });
+        return toolbar;
     }
 
 }

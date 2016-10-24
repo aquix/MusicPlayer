@@ -131,6 +131,12 @@ public class MusicRepository implements MusicDataSource {
             }
         }
     }
+    public Album getAlbum(String albumId) {
+        if(mCachedAlbums == null) {
+            getAlbums();
+        }
+        return mCachedAlbums.get(albumId);
+    }
 
     @NonNull
     @Override

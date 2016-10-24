@@ -23,6 +23,8 @@ import java.util.Locale;
 
 class SongsListAdapter extends BaseAdapter {
 
+    static final int INDEX_NOT_INIT = -1;
+
     private FragmentActivity mActivity;
     private LayoutInflater mInflater;
     private ArrayList<Song> mSongs;
@@ -35,7 +37,7 @@ class SongsListAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(activity);
         mAlbum = album;
         mSongs = new ArrayList<>();
-        mPlayingSongIndex = -1;
+        mPlayingSongIndex = INDEX_NOT_INIT;
     }
 
     void replaceData(List<Song> songs) {
@@ -68,6 +70,7 @@ class SongsListAdapter extends BaseAdapter {
 
     void setPlayingSong(int playingSongIndex) {
         mPlayingSongIndex = playingSongIndex;
+        notifyDataSetChanged();
     }
 
     void deleteSong(Song song) {
