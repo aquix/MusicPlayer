@@ -16,6 +16,7 @@ import com.fisko.music.data.Song;
 import com.fisko.music.ui.songs.SongsActivity;
 import com.fisko.music.utils.Constants;
 import com.fisko.music.utils.MathUtils;
+import com.fisko.music.utils.MusicUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -198,6 +199,7 @@ public class PlayerService extends Service implements
     public void onPrepared(MediaPlayer mediaPlayer) {
         mMediaPlayer.start();
         wasPrepared = true;
+        MusicUtils.addToRecent(mSongs.get(mSongIndex));
         startForeground(NOTIFICATION_ID, getNotification());
     }
 

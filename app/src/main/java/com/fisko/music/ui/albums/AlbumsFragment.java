@@ -39,7 +39,10 @@ public class AlbumsFragment extends Fragment implements
     private static final int PORTRAIT_COLUMNS_COUNT = 2;
     private static final int LANDSCAPE_COLUMNS_COUNT = 3;
 
+    private View mHeader;
+
     private AlbumsListAdapter mAdapter;
+    private AlbumsRecentAdapter mRecentSongsAdapter;
     private MusicRepository mRepository;
     private Handler mMainHandler;
 
@@ -66,29 +69,34 @@ public class AlbumsFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.albums_fragment, container, false);
+        mHeader = inflater.inflate(R.layout.albums_list_footer, container, false);
+
 
         HeaderGridView albumsGrid = (HeaderGridView) view.findViewById(R.id.albums_grid);
         setColumnsCount(albumsGrid);
         mAdapter = new AlbumsListAdapter(getActivity());
+        addRecentSongsHeader(albumsGrid);
         albumsGrid.setAdapter(mAdapter);
         loadAlbums();
 
         mMainHandler = new Handler(getContext().getMainLooper());
 
-        List<Song> recentSongs = MusicUtils.getRecent();
-        if(!recentSongs.isEmpty()) {
-            View header = inflater.inflate(R.layout.albums_list_footer, container, false);
-            LinearLayoutManager layoutManager
-                    = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-            RecyclerView songsList = (RecyclerView) header.findViewById(R.id.recent_songs);
-            songsList.setLayoutManager(layoutManager);
-
-            AlbumsRecentAdapter songsAdapter = new AlbumsRecentAdapter(recentSongs, getContext());
-            songsList.setAdapter(songsAdapter);
-            albumsGrid.addHeaderView(header);
-        }
-
         return view;
+    }
+
+    private void addRecentSongsHeader(HeaderGridView albumsGrid) {
+        List<Song> recentSongs = MusicUtils.getRecent();
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView songsList = (RecyclerView) mHeader.findViewById(R.id.recent_songs);
+        songsList.setLayoutManager(layoutManager);
+
+        mRecentSongsAdapter = new AlbumsRecentAdapter(recentSongs, getContext());
+        songsList.setAdapter(mRecentSongsAdapter);
+        if(recentSongs.isEmpty()) {
+            mHeader.setVisibility(View.GONE);
+        }
+        albumsGrid.addHeaderView(mHeader);
     }
 
     private void loadAlbums() {
@@ -121,6 +129,11 @@ public class AlbumsFragment extends Fragment implements
         Intent intent = new Intent(getActivity(), PlayerService.class);
         getActivity().startService(intent);
         getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        if (!MusicUtils.getRecent().isEmpty()) {
+            mHeader.setVisibility(View.VISIBLE);
+            mRecentSongsAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

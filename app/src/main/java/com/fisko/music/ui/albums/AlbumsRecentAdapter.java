@@ -1,6 +1,7 @@
 package com.fisko.music.ui.albums;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 
 import com.fisko.music.R;
 import com.fisko.music.data.Song;
+import com.fisko.music.ui.songs.SongsActivity;
+import com.fisko.music.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -34,10 +37,19 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        Song songs = mSongs.get(i);
-        viewHolder.songName.setText(songs.getName());
+        final Song song = mSongs.get(i);
         String coverUrl = mSongs.get(i).getImagePath();
+
+        viewHolder.songName.setText(song.getName());
         Picasso.with(mContext).load(coverUrl).into(viewHolder.cover);
+        viewHolder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent songIntent = new Intent(mContext, SongsActivity.class);
+                songIntent.putExtra(Constants.SONG_BUNDLE.OPENED_SONG, song);
+                mContext.startActivity(songIntent);
+            }
+        });
     }
 
     @Override
@@ -46,11 +58,13 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
+        private View view;
         private ImageView cover;
         private TextView songName;
 
         ViewHolder(View itemView) {
             super(itemView);
+            view = itemView;
             cover = (ImageView) itemView.findViewById(R.id.album_cover);
             songName = (TextView) itemView.findViewById(R.id.album_name);
 

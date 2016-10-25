@@ -19,7 +19,13 @@
         </activity>
 
         <activity android:name=".ui.songs.SongsActivity"
-            android:exported="false"/>
+            android:exported="false"
+            android:parentActivityName=".ui.albums.AlbumsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.albums.AlbumsActivity" />
+        </activity>
 
         <service android:name=".service.PlayerService"
             android:exported="false"/>

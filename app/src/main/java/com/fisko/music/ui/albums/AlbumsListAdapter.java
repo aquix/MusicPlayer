@@ -82,12 +82,12 @@ class AlbumsListAdapter extends BaseAdapter {
 
             fillHolder(holder, album);
             view.setTag(holder);
-            mActivity.registerForContextMenu(view);
         } else {
             holder = (ViewHolder) view.getTag();
             fillHolder(holder, album);
         }
 
+        mActivity.registerForContextMenu(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
