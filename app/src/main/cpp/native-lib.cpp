@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <android/log.h>
 
 //extern "C"
 //jstring
@@ -17,28 +19,37 @@ static jmethodID java_util_ArrayList_;
 static jmethodID java_util_ArrayList_size;
 static jmethodID java_util_ArrayList_get;
 static jmethodID java_util_ArrayList_add;
+static jclass java_lang_Integer;
+static jmethodID java_lang_Integer_intValue;
 static JNIEnv* env;
 
 std::wstring jstr2cstr(jstring string);
 jstring cstr2jstr(std::wstring cstr);
 void init(JNIEnv* envIn);
-std::vector<std::string> arrayListToVector(jobject arrayList);
+std::vector<int> arrayListToVector(jobject arrayList);
 jobject vectorToArrayList(std::vector<std::string> vector);
 
 
 extern "C"
-jobject
-Java_com_fisko_music_ui_albums_AlbumsActivity_uppercase(
+jlong
+Java_com_fisko_music_ui_albums_AlbumsFragment_sum(
         JNIEnv* env,
         jobject /* this */,
         jobject arrayList) {
     init(env);
-    std::vector<std::string> vector = arrayListToVector(arrayList);
-    for (std::string &str: vector) {
-        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-    }
+    std::vector<int> vector = arrayListToVector(arrayList);
 
-    return vectorToArrayList(vector);
+    std::clock_t start_time = std::clock();
+    long long sum = 0;
+    for(int j = 0; j < 500; ++j) {
+        for (int i = 0; i < vector.size(); ++i) {
+            sum += vector[i];
+        }
+    }
+    long running_time = (long) ((std::clock() - start_time) / (double)(CLOCKS_PER_SEC / 1000));
+    __android_log_print(ANDROID_LOG_DEBUG, "JNI runnning time", "%ld", running_time);
+
+    return sum;
 }
 
 void init(JNIEnv* envIn) {
@@ -48,6 +59,8 @@ void init(JNIEnv* envIn) {
     java_util_ArrayList_size = env->GetMethodID (java_util_ArrayList, "size", "()I");
     java_util_ArrayList_get  = env->GetMethodID(java_util_ArrayList, "get", "(I)Ljava/lang/Object;");
     java_util_ArrayList_add  = env->GetMethodID(java_util_ArrayList, "add", "(Ljava/lang/Object;)Z");
+    java_lang_Integer           = static_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/Integer")));
+    java_lang_Integer_intValue  = env->GetMethodID(java_lang_Integer, "intValue", "()I");
 }
 
 std::wstring jstr2cstr(jstring string)
@@ -64,14 +77,14 @@ std::wstring jstr2cstr(jstring string)
     return value;
 }
 
-std::vector<std::string> arrayListToVector(jobject arrayList) {
+std::vector<int> arrayListToVector(jobject arrayList) {
     unsigned long len = (unsigned long) env->CallIntMethod(arrayList, java_util_ArrayList_size);
-    std::vector<std::string> result;
+    std::vector<int> result;
     result.reserve(len);
     for (jint i = 0; i < len; i++) {
-        jstring element = static_cast<jstring>(env->CallObjectMethod(arrayList, java_util_ArrayList_get, i));
-        const char *nativeString = env->GetStringUTFChars(element, 0);
-        result.push_back(nativeString);
+        jobject element = env->CallObjectMethod(arrayList, java_util_ArrayList_get, i);
+        int value = env->CallIntMethod(element, java_lang_Integer_intValue);
+        result.push_back(value);
     }
     return result;
 }

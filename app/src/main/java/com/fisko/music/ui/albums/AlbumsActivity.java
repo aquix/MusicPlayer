@@ -30,9 +30,11 @@ public class AlbumsActivity extends AppCompatActivity {
     private static String[] PERMISSIONS;
 
     static {
-//        System.loadLibrary("native-lib");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            PERMISSIONS = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
+            PERMISSIONS = new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            };
         }
     }
 
@@ -56,16 +58,7 @@ public class AlbumsActivity extends AppCompatActivity {
             transaction.add(R.id.content_frame, albumsFragment);
             transaction.commit();
         }
-//        checkJNI();
     }
-
-//    private void checkJNI() {
-//        ArrayList<String> list = new ArrayList<>(Arrays.asList("Hello", "World"));
-//        ArrayList<String> result = uppercase(list);
-//        Log.d("JNI test", result.toString());
-//    }
-//
-//    public native ArrayList<String> uppercase(ArrayList<String> list);
 
     private void searchMusic() {
         if (mServiceBound) {

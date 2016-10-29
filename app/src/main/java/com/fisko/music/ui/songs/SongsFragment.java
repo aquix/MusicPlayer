@@ -4,22 +4,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.fisko.music.R;
 import com.fisko.music.data.Album;
@@ -31,6 +31,7 @@ import com.fisko.music.service.PlayerService;
 import com.fisko.music.utils.Constants;
 import com.fisko.music.utils.UIUtils;
 
+import java.io.File;
 import java.util.List;
 
 public class SongsFragment extends Fragment implements PlayerService.PlayerCallback {
@@ -40,6 +41,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     private SongsListAdapter mAdapter;
     private MusicRepository mRepository;
     private List<Song> mSongs;
+    private boolean isSortBySize = true;
 
 
     private PlayerService mService;
@@ -70,15 +72,15 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         }
 
         if(openedSong != null) {
-            List<Song> songs = mRepository.getSongs(mAlbum.getId());
+            List<Song> songs = mRepository.getSongs(mAlbum.getId(), isSortBySize);
             UIUtils.openSongPlayer(openedSong, songs, getActivity());
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         View view  = inflater.inflate(R.layout.songs_fragment, container, false);
         UIUtils.setUpToolbar(true, mAlbum.getName() ,(AppCompatActivity) getActivity());
 
@@ -86,6 +88,8 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         mAdapter = new SongsListAdapter(mAlbum, getActivity());
         albumsList.setAdapter(mAdapter);
         loadAlbums();
+
+        registerForContextMenu(albumsList);
 
         return view;
     }
@@ -97,8 +101,25 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     }
 
     private void loadAlbums() {
-        mSongs = mRepository.getSongs(mAlbum.getId());
+        mSongs = mRepository.getSongs(mAlbum.getId(), isSortBySize);
         mAdapter.replaceData(mSongs);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.songs_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.songs_menu_sort:
+                isSortBySize = !isSortBySize;
+                loadAlbums();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -143,11 +164,23 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
                 AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
                 int position = info.position;
                 Song song = mSongs.get(position);
-                mAdapter.deleteSong(song);
-                mRepository.deleteSong(song);
+                removeSong(song);
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    public void removeSong(Song song) {
+        mAdapter.deleteSong(song);
+        mRepository.deleteSong(song);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            File file = new File(song.getPath());
+            boolean deleted = file.delete();
+            if (deleted) {
+                Toast.makeText(getContext(), R.string.delete_failed, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void setPlayingSong(boolean isPlaying, Song song) {

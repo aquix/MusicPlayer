@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
+import android.util.Log;
 
 import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
@@ -18,6 +20,7 @@ import java.util.List;
 
 public class MusicLocalDataSource implements MusicDataSource {
 
+    private static final String LOG_TAG = "DB log";
     private static MusicLocalDataSource INSTANCE;
 
     private TablesDbHelper mDbHelper;
@@ -162,9 +165,52 @@ public class MusicLocalDataSource implements MusicDataSource {
 
     }
 
+    @Override
+    public ArrayList<Integer> printAllSongs() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        String table = AlbumEntry.TABLE_NAME + " as Album inner join "+ SongEntry.TABLE_NAME +" as Song " +
+                "on Album."+ AlbumEntry.COLUMN_NAME_ENTRY_ID +" = Song." + SongEntry.COLUMN_NAME_ALBUM_ID;
+        String columns[] = {
+                "Album."+ AlbumEntry.COLUMN_NAME_ALBUM_NAME +" as Album",
+                "Album."+ AlbumEntry.COLUMN_NAME_ALBUM_ARTIST +" as Artist",
+                "Song."+ SongEntry.COLUMN_NAME_SONG_NAME +" as Name",
+                "Song."+ SongEntry.COLUMN_NAME_SONG_DURATION +" as Duration",
+        };
+        Cursor c = db.query(table, columns, null, null, null, null, null);
+        ArrayList<Integer> durations = logCursor(c);
+
+        if (c != null) {
+            c.close();
+        }
+        db.close();
+
+        return durations;
+    }
+
+    private ArrayList<Integer> logCursor(Cursor c) {
+        ArrayList<Integer> durations = new ArrayList<>();
+        if (c != null) {
+            if (c.moveToFirst()) {
+                String str;
+                do {
+                    str = "";
+                    for (String cn : c.getColumnNames()) {
+                        str = str.concat(cn + " = " + c.getString(c.getColumnIndex(cn)) + "; ");
+                        durations.add(c.getInt(c.getColumnIndex("Duration")));
+                    }
+                    Log.d(LOG_TAG, str);
+                } while (c.moveToNext());
+            }
+        } else {
+            Log.d(LOG_TAG, "Cursor is null");
+        }
+        return durations;
+    }
+
     @NonNull
     @Override
-    public List<Song> getSongs(@NonNull String albumId) {
+    public List<Song> getSongs(@NonNull String albumId, boolean sortByName) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         List<Song> songs = new ArrayList<>();
         String[] projection =  {
@@ -178,8 +224,15 @@ public class MusicLocalDataSource implements MusicDataSource {
         String selection = SongEntry.COLUMN_NAME_ALBUM_ID + " LIKE ?";
         String[] selectionArgs = { albumId };
 
+        String sortBy;
+        if (sortByName) {
+            sortBy = SongEntry.COLUMN_NAME_SONG_NAME;
+        } else {
+            sortBy = SongEntry.COLUMN_NAME_SONG_DURATION;
+        }
+
         Cursor c = db.query(
-                SongEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+                SongEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortBy);
 
         if (c != null && c.getCount() > 0) {
             while (c.moveToNext()) {

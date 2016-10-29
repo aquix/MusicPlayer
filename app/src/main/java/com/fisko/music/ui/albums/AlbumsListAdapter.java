@@ -87,11 +87,20 @@ class AlbumsListAdapter extends BaseAdapter {
             fillHolder(holder, album);
         }
 
-        mActivity.registerForContextMenu(view);
+        view.setClickable(true);
+        view.setLongClickable(true);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openAlbum(album);
+            }
+        });
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mActivity.registerForContextMenu(v);
+                mActivity.openContextMenu(v);
+                return true;
             }
         });
 

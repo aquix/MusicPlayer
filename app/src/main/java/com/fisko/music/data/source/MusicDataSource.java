@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface MusicDataSource {
@@ -21,6 +22,8 @@ public interface MusicDataSource {
     List<Album> getAlbums();
 
     @NonNull
-    List<Song> getSongs(@NonNull String albumId);
+    List<Song> getSongs(@NonNull String albumId, boolean sortByName);
+
+    ArrayList<Integer> printAllSongs();
 
 }

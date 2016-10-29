@@ -23,7 +23,7 @@ public class SquareItemView extends ImageView {
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        Log.d("smt", "" + width + " " + height);
+//        Log.d("smt", "" + width + " " + height);
         if(width != 0) {
             super.onMeasure(widthMeasureSpec, widthMeasureSpec);
         } else {

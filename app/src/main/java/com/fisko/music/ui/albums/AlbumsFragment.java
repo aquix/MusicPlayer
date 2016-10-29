@@ -10,8 +10,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -30,14 +32,21 @@ import com.fisko.music.service.PlayerService;
 import com.fisko.music.ui.view.HeaderGridView;
 import com.fisko.music.utils.MusicUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlbumsFragment extends Fragment implements
         MusicRepository.AlbumsRepositoryObserver,
         PlayerService.PlayerCallback {
 
+    static {
+        System.loadLibrary("native-lib");
+    }
+
     private static final int PORTRAIT_COLUMNS_COUNT = 2;
     private static final int LANDSCAPE_COLUMNS_COUNT = 3;
+
+    private static final String TAG_LIFECYCLE = "LIFECYCLE";
 
     private View mHeader;
 
@@ -63,7 +72,28 @@ public class AlbumsFragment extends Fragment implements
         MusicDataSource localDataSource = MusicLocalDataSource.getInstance(getContext());
         mRepository = MusicRepository.getInstance(localDataSource);
         mRepository.addContentObserver(this);
+        ArrayList<Integer> durations = mRepository.printAllSongs();
+        checkJNI(durations);
+        Log.d(TAG_LIFECYCLE, "onCreate");
     }
+
+    private void checkJNI(ArrayList<Integer> durations) {
+        long result = sum(durations);
+        Log.d("JNI all songs duration", Long.toString(result));
+
+        long startTime = System.currentTimeMillis();
+        long sum = 0;
+        for(int j = 0; j < 500; ++j) {
+            for (Integer value : durations) {
+                sum += value;
+            }
+        }
+        Log.d("Java all songs duration", Long.toString(sum));
+        Log.d("Java running time", "" + (System.currentTimeMillis() - startTime));
+
+    }
+
+    public native long sum(ArrayList<Integer> list);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -79,7 +109,11 @@ public class AlbumsFragment extends Fragment implements
         albumsGrid.setAdapter(mAdapter);
         loadAlbums();
 
+        registerForContextMenu(albumsGrid);
+
         mMainHandler = new Handler(getContext().getMainLooper());
+
+        Log.d(TAG_LIFECYCLE, "onCreateView");
 
         return view;
     }
@@ -134,6 +168,7 @@ public class AlbumsFragment extends Fragment implements
             mHeader.setVisibility(View.VISIBLE);
             mRecentSongsAdapter.notifyDataSetChanged();
         }
+        Log.d(TAG_LIFECYCLE, "onStart");
     }
 
     @Override
@@ -145,6 +180,7 @@ public class AlbumsFragment extends Fragment implements
             mBound = false;
         }
         mRepository.removeContentObserver(this);
+        Log.d(TAG_LIFECYCLE, "onStop");
     }
 
     @Override
@@ -160,7 +196,7 @@ public class AlbumsFragment extends Fragment implements
         switch (item.getItemId()) {
             case R.id.remove_from_list_item:
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                int position = info.position;
+                int position = info.position - 2;
                 Album album = mAlbums.get(position);
                 mAdapter.removeAlbum(album);
                 mRepository.deleteAlbum(album);
@@ -204,4 +240,39 @@ public class AlbumsFragment extends Fragment implements
         }
     };
 
+    @Override
+    public LoaderManager getLoaderManager() {
+        return super.getLoaderManager();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(TAG_LIFECYCLE, "onAttach");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG_LIFECYCLE, "onPause");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG_LIFECYCLE, "onResume");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG_LIFECYCLE, "onDestroy");
+    }
+
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG_LIFECYCLE, "onDetach");
+    }
 }

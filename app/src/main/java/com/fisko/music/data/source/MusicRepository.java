@@ -6,6 +6,8 @@ import com.fisko.music.data.Album;
 import com.fisko.music.data.Song;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,7 +60,24 @@ public class MusicRepository implements MusicDataSource {
         return mCachedAlbums == null ? new ArrayList<Album>() : new ArrayList<>(mCachedAlbums.values());
     }
 
-    private List<Song> getCachedSongs(@NonNull String albumId) {
+    private List<Song> getCachedSongs(@NonNull String albumId, boolean sortByName) {
+        Comparator<Song> comparator;
+        if (sortByName) {
+            comparator = new Comparator<Song>() {
+                @Override
+                public int compare(Song song1, Song song2) {
+                    return song1.getName().compareTo(song2.getName());
+                }
+            };
+        } else {
+            comparator = new Comparator<Song>() {
+                @Override
+                public int compare(Song song1, Song song2) {
+                    return song1.getDuration() - song2.getDuration();
+                }
+            };
+        }
+
         if (mCachedSongs == null) {
             return new ArrayList<>();
         }
@@ -70,6 +89,7 @@ public class MusicRepository implements MusicDataSource {
             }
         }
 
+        Collections.sort(songs, comparator);
         return songs;
     }
 
@@ -158,21 +178,26 @@ public class MusicRepository implements MusicDataSource {
 
     @NonNull
     @Override
-    public List<Song> getSongs(@NonNull String albumId) {
+    public List<Song> getSongs(@NonNull String albumId, boolean sortByName) {
         if (!mCacheSongsIsDirty) {
-            return getCachedSongs(albumId);
+            return getCachedSongs(albumId, sortByName);
         } else {
             List<Album> albums = mTablesLocalDataSource.getAlbums();
             mCachedSongs = new LinkedHashMap<>();
             for(Album nextAlbum: albums) {
-                for(Song nextSong: mTablesLocalDataSource.getSongs(nextAlbum.getId())) {
+                for(Song nextSong: mTablesLocalDataSource.getSongs(nextAlbum.getId(), sortByName)) {
                     mCachedSongs.put(nextSong.getId(), nextSong);
                 }
             }
 
             mCacheSongsIsDirty = false;
-            return getCachedSongs(albumId);
+            return getCachedSongs(albumId, sortByName);
         }
+    }
+
+    @Override
+    public ArrayList<Integer>  printAllSongs() {
+        return mTablesLocalDataSource.printAllSongs();
     }
 
     private void notifyAlbumsChanged() {
