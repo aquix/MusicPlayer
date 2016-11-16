@@ -27,32 +27,32 @@ public class Album implements Parcelable {
     }
 
     private Album(Parcel parcel) {
-        id = parcel.readString();
-        name = parcel.readString();
-        artist = parcel.readString();
-        path = parcel.readString();
-        imagePath = parcel.readString();
+        this.id = parcel.readString();
+        this.name = parcel.readString();
+        this.artist = parcel.readString();
+        this.path = parcel.readString();
+        this.imagePath = parcel.readString();
     }
 
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getArtist() {
-        return artist;
+        return this.artist;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public String getImagePath() {
-        return imagePath;
+        return this.imagePath;
     }
 
     @Override
@@ -62,11 +62,11 @@ public class Album implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(id);
-        parcel.writeString(name);
-        parcel.writeString(artist);
-        parcel.writeString(path);
-        parcel.writeString(imagePath);
+        parcel.writeString(this.id);
+        parcel.writeString(this.name);
+        parcel.writeString(this.artist);
+        parcel.writeString(this.path);
+        parcel.writeString(this.imagePath);
     }
 
     public static final Parcelable.Creator<Album> CREATOR = new Parcelable.Creator<Album>() {
@@ -88,11 +88,11 @@ public class Album implements Parcelable {
             return false;
         }
         final Album album = (Album) obj;
-        return Objects.equal(id, album.getId()) &&
-                Objects.equal(name, album.getName()) &&
-                Objects.equal(artist, album.getArtist()) &&
-                Objects.equal(path, album.getPath()) &&
-                Objects.equal(imagePath, album.getImagePath());
+        return Objects.equal(this.id, album.getId()) &&
+                Objects.equal(this.name, album.getName()) &&
+                Objects.equal(this.artist, album.getArtist()) &&
+                Objects.equal(this.path, album.getPath()) &&
+                Objects.equal(this.imagePath, album.getImagePath());
     }
 
 }

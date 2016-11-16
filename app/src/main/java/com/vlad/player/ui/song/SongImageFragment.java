@@ -31,8 +31,8 @@ public class SongImageFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            song = getArguments().getParcelable(SONG_INSTANCE);
+        if (this.getArguments() != null) {
+            this.song = this.getArguments().getParcelable(SONG_INSTANCE);
         }
     }
 
@@ -42,8 +42,8 @@ public class SongImageFragment extends Fragment {
         View view  = inflater.inflate(R.layout.song_pager_item, container, false);
 
         ImageView image = (ImageView) view.findViewById(R.id.song_image);
-        String imageUrl = song.getImagePath();
-        Picasso.with(getContext()).load(imageUrl).into(image);
+        String imageUrl = this.song.getImagePath();
+        Picasso.with(this.getContext()).load(imageUrl).into(image);
 
         return view;
     }

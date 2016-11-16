@@ -30,36 +30,36 @@ public class Song implements Parcelable {
     }
 
     private Song(Parcel parcel) {
-        id = parcel.readString();
-        name = parcel.readString();
-        path = parcel.readString();
-        imagePath = parcel.readString();
-        duration = parcel.readInt();
-        albumId = parcel.readString();
+        this.id = parcel.readString();
+        this.name = parcel.readString();
+        this.path = parcel.readString();
+        this.imagePath = parcel.readString();
+        this.duration = parcel.readInt();
+        this.albumId = parcel.readString();
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public String getAlbumId() {
-        return albumId;
+        return this.albumId;
     }
 
     public int getDuration() {
-        return duration;
+        return this.duration;
     }
 
     public String getImagePath() {
-        return imagePath;
+        return this.imagePath;
     }
 
     @Override
@@ -69,12 +69,12 @@ public class Song implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(id);
-        parcel.writeString(name);
-        parcel.writeString(path);
-        parcel.writeString(imagePath);
-        parcel.writeInt(duration);
-        parcel.writeString(albumId);
+        parcel.writeString(this.id);
+        parcel.writeString(this.name);
+        parcel.writeString(this.path);
+        parcel.writeString(this.imagePath);
+        parcel.writeInt(this.duration);
+        parcel.writeString(this.albumId);
     }
 
     public static final Parcelable.Creator<Song> CREATOR = new Parcelable.Creator<Song>() {
@@ -96,12 +96,12 @@ public class Song implements Parcelable {
             return false;
         }
         final Song song = (Song) obj;
-        return Objects.equal(id, song.getId()) &&
-                Objects.equal(name, song.getName()) &&
-                Objects.equal(path, song.getPath()) &&
-                Objects.equal(imagePath, song.getImagePath()) &&
-                Objects.equal(duration, song.getDuration()) &&
-                Objects.equal(albumId, song.getAlbumId());
+        return Objects.equal(this.id, song.getId()) &&
+                Objects.equal(this.name, song.getName()) &&
+                Objects.equal(this.path, song.getPath()) &&
+                Objects.equal(this.imagePath, song.getImagePath()) &&
+                Objects.equal(this.duration, song.getDuration()) &&
+                Objects.equal(this.albumId, song.getAlbumId());
     }
 
 }

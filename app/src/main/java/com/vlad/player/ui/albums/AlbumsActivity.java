@@ -42,26 +42,26 @@ public class AlbumsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.albums_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        this.setContentView(R.layout.albums_activity);
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
 
         AlbumsFragment albumsFragment =
-                (AlbumsFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
+                (AlbumsFragment) this.getSupportFragmentManager().findFragmentById(R.id.content_frame);
         if (albumsFragment == null) {
             albumsFragment = AlbumsFragment.newInstance();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.content_frame, albumsFragment);
             transaction.commit();
         }
     }
 
     private void searchMusic() {
-        if (isServiceBound) {
-            searchService.startMusicSearch();
+        if (this.isServiceBound) {
+            this.searchService.startMusicSearch();
         } else {
             Intent intent = new Intent(this, SearchService.class);
-            bindService(intent, mConnection, BIND_AUTO_CREATE);
+            this.bindService(intent, this.mConnection, BIND_AUTO_CREATE);
         }
     }
 
@@ -72,8 +72,8 @@ public class AlbumsActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        if(isServiceBound) {
-            unbindService(mConnection);
+        if(this.isServiceBound) {
+            this.unbindService(this.mConnection);
         }
     }
 
@@ -81,7 +81,7 @@ public class AlbumsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.albums_search_menu:
-                requestPermAndSearchMusic();
+                this.requestPermAndSearchMusic();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -94,7 +94,7 @@ public class AlbumsActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_READ_STORAGE:
                 if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    searchMusic();
+                    this.searchMusic();
                 } else {
                     Toast.makeText(this, R.string.read_storage_not_granted, Toast.LENGTH_LONG).show();
                 }
@@ -106,7 +106,7 @@ public class AlbumsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        MenuInflater inflater = this.getMenuInflater();
         inflater.inflate(R.menu.albums_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -115,13 +115,13 @@ public class AlbumsActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             SearchService.LocalBinder binder = (SearchService.LocalBinder) service;
             AlbumsActivity.this.searchService = binder.getService();
-            isServiceBound = true;
+            AlbumsActivity.this.isServiceBound = true;
             AlbumsActivity.this.searchService.startMusicSearch();
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            searchService = null;
-            isServiceBound = false;
+            AlbumsActivity.this.searchService = null;
+            AlbumsActivity.this.isServiceBound = false;
         }
     };
 

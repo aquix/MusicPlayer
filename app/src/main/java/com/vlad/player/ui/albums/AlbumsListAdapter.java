@@ -29,24 +29,24 @@ class AlbumsListAdapter extends BaseAdapter {
     private String playingAlbumId;
 
     AlbumsListAdapter(Activity activity) {
-        layoutInflater = LayoutInflater.from(activity);
-        albums = new ArrayList<>();
+        this.layoutInflater = LayoutInflater.from(activity);
+        this.albums = new ArrayList<>();
         this.activity = activity;
     }
 
     void replaceData(List<Album> albums) {
         this.albums = new ArrayList<>(albums);
-        notifyDataSetChanged();
+        this.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return albums.size();
+        return this.albums.size();
     }
 
     @Override
     public Album getItem(int position) {
-        return albums.get(position);
+        return this.albums.get(position);
     }
 
     @Override
@@ -62,17 +62,17 @@ class AlbumsListAdapter extends BaseAdapter {
     }
 
     void setPlayingAlbum(String albumId) {
-        playingAlbumId = albumId;
-        notifyDataSetChanged();
+        this.playingAlbumId = albumId;
+        this.notifyDataSetChanged();
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final Album album = getItem(position);
+        final Album album = this.getItem(position);
         ViewHolder holder;
 
         if(view == null || view.getTag() == null) {
-            view = layoutInflater.inflate(R.layout.albums_list_item, parent, false);
+            view = this.layoutInflater.inflate(R.layout.albums_list_item, parent, false);
             holder = new ViewHolder();
 
             holder.albumName = (TextView) view.findViewById(R.id.album_name);
@@ -80,11 +80,11 @@ class AlbumsListAdapter extends BaseAdapter {
             holder.playingIndicator = (ImageView) view.findViewById(R.id.album_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.album_cover);
 
-            fillHolder(holder, album);
+            this.fillHolder(holder, album);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
-            fillHolder(holder, album);
+            this.fillHolder(holder, album);
         }
 
         view.setClickable(true);
@@ -92,14 +92,14 @@ class AlbumsListAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openAlbum(album);
+                AlbumsListAdapter.this.openAlbum(album);
             }
         });
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                activity.registerForContextMenu(v);
-                activity.openContextMenu(v);
+                AlbumsListAdapter.this.activity.registerForContextMenu(v);
+                AlbumsListAdapter.this.activity.openContextMenu(v);
                 return true;
             }
         });
@@ -108,27 +108,27 @@ class AlbumsListAdapter extends BaseAdapter {
     }
 
     void removeAlbum(Album album) {
-        albums.remove(album);
-        notifyDataSetChanged();
+        this.albums.remove(album);
+        this.notifyDataSetChanged();
     }
 
     private void openAlbum(Album album) {
-        Intent intent = new Intent(activity, SongsActivity.class);
+        Intent intent = new Intent(this.activity, SongsActivity.class);
         intent.putExtra(Constants.ALBUM_BUNDLE.ALBUM, album);
-        activity.startActivity(intent);
+        this.activity.startActivity(intent);
     }
 
     private void fillHolder(ViewHolder holder, Album album) {
         holder.albumName.setText(album.getName());
         holder.albumArtist.setText(album.getArtist());
-        if(album.getId().equals(playingAlbumId)) {
-            Drawable drawable = ContextCompat.getDrawable(activity, R.drawable.playing_indicator);
+        if(album.getId().equals(this.playingAlbumId)) {
+            Drawable drawable = ContextCompat.getDrawable(this.activity, R.drawable.playing_indicator);
             holder.playingIndicator.setImageDrawable(drawable);
         } else {
             holder.playingIndicator.setImageResource(android.R.color.transparent);
         }
         String coverUrl = album.getImagePath();
-        Picasso.with(activity).load(coverUrl).into(holder.albumCover);
+        Picasso.with(this.activity).load(coverUrl).into(holder.albumCover);
     }
 
 

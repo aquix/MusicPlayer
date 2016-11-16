@@ -54,14 +54,14 @@ public class PlayerService extends Service implements
     }
 
     public PlayerService() {
-        initializePlayer();
+        this.initializePlayer();
     }
 
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return this.binder;
     }
 
     @Override
@@ -70,26 +70,26 @@ public class PlayerService extends Service implements
     }
 
     public void addPlayerListener(PlayerCallback callback) {
-        callbacks.add(callback);
-        notifyGetState(callback);
+        this.callbacks.add(callback);
+        this.notifyGetState(callback);
     }
 
     public void removePlayerListener(PlayerCallback callback) {
-        callbacks.remove(callback);
+        this.callbacks.remove(callback);
     }
 
     private void notifyGetState(PlayerCallback callback) {
         float seekPos = 0;
         boolean isPlaying = false;
-        if (mediaPlayer != null) {
-            if (wasPrepared) {
-                seekPos = (float) mediaPlayer.getDuration() / mediaPlayer.getCurrentPosition();
+        if (this.mediaPlayer != null) {
+            if (this.wasPrepared) {
+                seekPos = (float) this.mediaPlayer.getDuration() / this.mediaPlayer.getCurrentPosition();
             }
-            isPlaying = mediaPlayer.isPlaying();
+            isPlaying = this.mediaPlayer.isPlaying();
         }
 
         if (isPlaying) {
-            Song song = songs.get(currentSongIndex);
+            Song song = this.songs.get(this.currentSongIndex);
             callback.onGetState(seekPos, true, song);
         } else {
             callback.onGetState(seekPos, false, null);
@@ -98,20 +98,20 @@ public class PlayerService extends Service implements
 
     private void notifyNextSong(Song song) {
         boolean isPlaying = false;
-        if (mediaPlayer != null) {
-            isPlaying = mediaPlayer.isPlaying();
+        if (this.mediaPlayer != null) {
+            isPlaying = this.mediaPlayer.isPlaying();
         }
-        for(PlayerCallback callback: callbacks) {
+        for(PlayerCallback callback: this.callbacks) {
             callback.onStateChanged(isPlaying, song);
         }
     }
 
 
     private void initializePlayer() {
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnCompletionListener(this);
+        this.mediaPlayer = new MediaPlayer();
+        this.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        this.mediaPlayer.setOnPreparedListener(this);
+        this.mediaPlayer.setOnCompletionListener(this);
 
 //        mTimer = new CountDownTimer(Long.MAX_VALUE, UPDATE_DELAY) {
 //            public void onTick(long millisUntilFinished) {
@@ -123,10 +123,10 @@ public class PlayerService extends Service implements
     }
 
     public void setCurDataSource() {
-        String songPath = songs.get(currentSongIndex).getPath();
+        String songPath = this.songs.get(this.currentSongIndex).getPath();
         try {
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(songPath);
+            this.mediaPlayer.reset();
+            this.mediaPlayer.setDataSource(songPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,48 +134,48 @@ public class PlayerService extends Service implements
 
     public void play(int songIndex, ArrayList<Song> songs) {
         String albumId = songs.get(songIndex).getAlbumId();
-        boolean isPause = !mediaPlayer.isPlaying();
-        boolean isSongNotChanged = albumId.equals(this.albumId) && songIndex == currentSongIndex;
+        boolean isPause = !this.mediaPlayer.isPlaying();
+        boolean isSongNotChanged = albumId.equals(this.albumId) && songIndex == this.currentSongIndex;
 
         if (isPause && isSongNotChanged) {
-            mediaPlayer.start();
+            this.mediaPlayer.start();
         } else {
-            currentSongIndex = songIndex;
+            this.currentSongIndex = songIndex;
             this.songs = songs;
             this.albumId = albumId;
 
-            setCurDataSource();
-            mediaPlayer.prepareAsync();
+            this.setCurDataSource();
+            this.mediaPlayer.prepareAsync();
         }
     }
 
     public void pause() {
-        if (mediaPlayer != null) {
-            mediaPlayer.pause();
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.pause();
         }
     }
 
     public void release() {
-        if (mediaPlayer != null) {
+        if (this.mediaPlayer != null) {
             try {
-                mediaPlayer.release();
-                mediaPlayer = null;
+                this.mediaPlayer.release();
+                this.mediaPlayer = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        stopForeground(true);
+        this.stopForeground(true);
     }
 
     private Notification getNotification() {
-        Song song = songs.get(currentSongIndex);
+        Song song = this.songs.get(this.currentSongIndex);
         Intent songIntent = new Intent(this, SongsActivity.class);
         songIntent.putExtra(Constants.SONG_BUNDLE.OPENED_SONG, song);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setContentTitle(getString(R.string.current_playing))
+        builder.setContentTitle(this.getString(R.string.current_playing))
                 .setSmallIcon(R.drawable.playing_indicator)
-                .setContentText(songs.get(currentSongIndex).getName())
+                .setContentText(this.songs.get(this.currentSongIndex).getName())
                 .setContentIntent(PendingIntent.getActivity(this, 0, songIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -184,29 +184,29 @@ public class PlayerService extends Service implements
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        if(songs == null) {
+        if(this.songs == null) {
             return;
         }
-        currentSongIndex = MathUtils.getPositiveModule(currentSongIndex + 1, songs.size());
-        setCurDataSource();
+        this.currentSongIndex = MathUtils.getPositiveModule(this.currentSongIndex + 1, this.songs.size());
+        this.setCurDataSource();
         this.mediaPlayer.prepareAsync();
 
-        Song song = songs.get(currentSongIndex);
-        notifyNextSong(song);
+        Song song = this.songs.get(this.currentSongIndex);
+        this.notifyNextSong(song);
     }
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         this.mediaPlayer.start();
-        wasPrepared = true;
-        MusicUtils.addToRecent(songs.get(currentSongIndex));
-        startForeground(NOTIFICATION_ID, getNotification());
+        this.wasPrepared = true;
+        MusicUtils.addToRecent(this.songs.get(this.currentSongIndex));
+        this.startForeground(NOTIFICATION_ID, this.getNotification());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        release();
+        this.release();
     }
 
 }

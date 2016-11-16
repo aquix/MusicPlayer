@@ -56,9 +56,9 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            songIndex = getArguments().getInt(Constants.SONG_BUNDLE.CURRENT_SONG_INDEX);
-            songs = getArguments().getParcelableArrayList(Constants.SONG_BUNDLE.SONGS_LIST);
+        if (this.getArguments() != null) {
+            this.songIndex = this.getArguments().getInt(Constants.SONG_BUNDLE.CURRENT_SONG_INDEX);
+            this.songs = this.getArguments().getParcelableArrayList(Constants.SONG_BUNDLE.SONGS_LIST);
         }
     }
 
@@ -66,51 +66,51 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.song_fragment, container, false);
-        toolbar = UIUtils.setUpToolbar(false, null, (AppCompatActivity) getActivity());
+        this.toolbar = UIUtils.setUpToolbar(false, null, (AppCompatActivity) this.getActivity());
 
-        songPager = (ViewPager) view.findViewById(R.id.song_pager);
-        PagerAdapter pagerAdapter = new SongPagerAdapter(songs, getFragmentManager());
-        songPager.setAdapter(pagerAdapter);
+        this.songPager = (ViewPager) view.findViewById(R.id.song_pager);
+        PagerAdapter pagerAdapter = new SongPagerAdapter(this.songs, this.getFragmentManager());
+        this.songPager.setAdapter(pagerAdapter);
 
         View swipePanelControl = view.findViewById(R.id.swipe_control_panel);
-        addSwipeGestureControl(swipePanelControl);
+        this.addSwipeGestureControl(swipePanelControl);
 
         View prevButton = view.findViewById(R.id.prev_song_button);
         View nextButton = view.findViewById(R.id.next_song_button);
-        playButton = (ImageView) view.findViewById(R.id.player_control);
+        this.playButton = (ImageView) view.findViewById(R.id.player_control);
 
-        setSongData();
+        this.setSongData();
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playAnotherSong(-1);
+                SongFragment.this.playAnotherSong(-1);
             }
         });
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playAnotherSong(1);
+                SongFragment.this.playAnotherSong(1);
             }
         });
-        playButton.setOnTouchListener(new View.OnTouchListener() {
+        this.playButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_UP:
-                        playAnotherSong(0);
+                        SongFragment.this.playAnotherSong(0);
                         break;
                 }
                 return true;
             }
         });
 
-        songPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        this.songPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                if(position != songIndex) {
-                    playAnotherSong(position - songIndex);
+                if(position != SongFragment.this.songIndex) {
+                    SongFragment.this.playAnotherSong(position - SongFragment.this.songIndex);
                 }
             }
         });
@@ -121,55 +121,55 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(Constants.SONG_BUNDLE.CURRENT_SONG_INDEX, songIndex);
-        outState.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, songs.get(songIndex));
+        outState.putInt(Constants.SONG_BUNDLE.CURRENT_SONG_INDEX, this.songIndex);
+        outState.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, this.songs.get(this.songIndex));
     }
 
     private void setSongData() {
-        if (songPager.getCurrentItem() != songIndex) {
-            songPager.setCurrentItem(songIndex, true);
+        if (this.songPager.getCurrentItem() != this.songIndex) {
+            this.songPager.setCurrentItem(this.songIndex, true);
         }
-        String songName = songs.get(songIndex).getName();
-        if (toolbar != null) {
-            toolbar.setTitle(songName);
+        String songName = this.songs.get(this.songIndex).getName();
+        if (this.toolbar != null) {
+            this.toolbar.setTitle(songName);
         }
 
         int playImageResource;
-        if(isPlaying) {
+        if(this.isPlaying) {
             playImageResource = android.R.drawable.ic_media_pause;
         } else {
             playImageResource = android.R.drawable.ic_media_play;
         }
-        playButton.setImageResource(playImageResource);
+        this.playButton.setImageResource(playImageResource);
     }
 
     public void playAnotherSong(int offset) {
         if (offset == 0) {
-            if(isPlaying) {
-                playerService.pause();
+            if(this.isPlaying) {
+                this.playerService.pause();
             } else {
-                playerService.play(songIndex, songs);
+                this.playerService.play(this.songIndex, this.songs);
             }
-            isPlaying = !isPlaying;
+            this.isPlaying = !this.isPlaying;
         } else {
-            songIndex = MathUtils.getPositiveModule(songIndex + offset, songs.size());
-            if(isPlaying) {
-                playerService.play(songIndex, songs);
+            this.songIndex = MathUtils.getPositiveModule(this.songIndex + offset, this.songs.size());
+            if(this.isPlaying) {
+                this.playerService.play(this.songIndex, this.songs);
             } else {
-                playerService.pause();
+                this.playerService.pause();
             }
         }
 
-        setSongData();
+        this.setSongData();
     }
 
     private void playSong() {
-        playerService.play(songIndex, songs);
-        setSongData();
+        this.playerService.play(this.songIndex, this.songs);
+        this.setSongData();
     }
 
     public void addSwipeGestureControl(View panel) {
-        final int swipeMinLen = (int) getResources().getDimension(R.dimen.sipe_min_len);
+        final int swipeMinLen = (int) this.getResources().getDimension(R.dimen.sipe_min_len);
         panel.setOnTouchListener(new View.OnTouchListener() {
             float startX = 0 ;
             float endX = 0;
@@ -177,17 +177,17 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             public boolean onTouch(View v, MotionEvent event) {
                 switch(event.getAction()){
                     case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
+                        this.startX = event.getX();
                         break;
                     case MotionEvent.ACTION_MOVE:
                         break;
                     case MotionEvent.ACTION_UP:
-                        endX = event.getX();
-                        if(Math.abs(endX - startX) > swipeMinLen) {
-                            if (startX > endX) {
-                                playAnotherSong(-1);
+                        this.endX = event.getX();
+                        if(Math.abs(this.endX - this.startX) > swipeMinLen) {
+                            if (this.startX > this.endX) {
+                                SongFragment.this.playAnotherSong(-1);
                             } else {
-                                playAnotherSong(1);
+                                SongFragment.this.playAnotherSong(1);
                             }
                         }
                         break;
@@ -210,41 +210,39 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     @Override
     public void onStart() {
         super.onStart();
-        Intent intent = new Intent(getActivity(), PlayerService.class);
-        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this.getActivity(), PlayerService.class);
+        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (isServiceBound) {
-            playerService.removePlayerListener(this);
-            getActivity().unbindService(mConnection);
-            isServiceBound = false;
+        if (this.isServiceBound) {
+            this.playerService.removePlayerListener(this);
+            this.getActivity().unbindService(this.mConnection);
+            this.isServiceBound = false;
         }
     }
 
     @Override
     public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
-        Song curSong = songs.get(songIndex);
+        Song curSong = this.songs.get(this.songIndex);
         this.isPlaying = isPlaying;
 
-        if (curSong.equals(song)) {
-
-        } else {
+        if (!curSong.equals(song)) {
             if (isPlaying ) {
-                playSong();
+                this.playSong();
             }
         }
 
-        setSongData();
+        this.setSongData();
     }
 
     @Override
     public void onStateChanged(boolean isPlaying, Song song) {
-        songIndex = songs.indexOf(song);
+        this.songIndex = this.songs.indexOf(song);
         this.isPlaying = isPlaying;
-        setSongData();
+        this.setSongData();
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -253,14 +251,14 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            playerService = binder.getService();
-            playerService.addPlayerListener(SongFragment.this);
-            isServiceBound = true;
+            SongFragment.this.playerService = binder.getService();
+            SongFragment.this.playerService.addPlayerListener(SongFragment.this);
+            SongFragment.this.isServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            isServiceBound = false;
+            SongFragment.this.isServiceBound = false;
         }
     };
 

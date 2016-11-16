@@ -25,7 +25,7 @@ import com.vlad.player.R;
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
 import com.vlad.player.data.source.IDbContext;
-import com.vlad.player.data.source.MusicRepository;
+import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.data.source.local.DbContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
@@ -39,7 +39,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     private Album album;
 
     private SongsListAdapter adapter;
-    private MusicRepository musicRepository;
+    private DbObservableContext musicRepository;
     private List<Song> songs;
     private boolean isSortBySize = true;
 
@@ -60,36 +60,35 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Song openedSong = null;
-        if (getArguments() != null) {
-            album = getArguments().getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
-            openedSong = getArguments().getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
+        if (this.getArguments() != null) {
+            this.album = this.getArguments().getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
+            openedSong = this.getArguments().getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
 
-        IDbContext localDataSource = DbContext.getInstance(getContext());
-        musicRepository = MusicRepository.getInstance(localDataSource);
-        if(album == null && openedSong != null) {
-            album = musicRepository.getAlbum(openedSong.getAlbumId());
+        this.musicRepository = DbObservableContext.getInstance(this.getContext());
+        if(this.album == null && openedSong != null) {
+            this.album = this.musicRepository.getAlbum(openedSong.getAlbumId());
         }
 
         if(openedSong != null) {
-            List<Song> songs = musicRepository.getSongs(album.getId(), isSortBySize);
-            UIUtils.openSongPlayer(openedSong, songs, getActivity());
+            List<Song> songs = this.musicRepository.getSongs(this.album.getId(), this.isSortBySize);
+            UIUtils.openSongPlayer(openedSong, songs, this.getActivity());
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
+        this.setHasOptionsMenu(true);
         View view  = inflater.inflate(R.layout.songs_fragment, container, false);
-        UIUtils.setUpToolbar(true, album.getName() ,(AppCompatActivity) getActivity());
+        UIUtils.setUpToolbar(true, this.album.getName() ,(AppCompatActivity) this.getActivity());
 
         ListView albumsList = (ListView) view.findViewById(R.id.songs_list);
-        adapter = new SongsListAdapter(album, getActivity());
-        albumsList.setAdapter(adapter);
-        loadAlbums();
+        this.adapter = new SongsListAdapter(this.album, this.getActivity());
+        albumsList.setAdapter(this.adapter);
+        this.loadAlbums();
 
-        registerForContextMenu(albumsList);
+        this.registerForContextMenu(albumsList);
 
         return view;
     }
@@ -97,12 +96,12 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, album);
+        outState.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, this.album);
     }
 
     private void loadAlbums() {
-        songs = musicRepository.getSongs(album.getId(), isSortBySize);
-        adapter.replaceData(songs);
+        this.songs = this.musicRepository.getSongs(this.album.getId(), this.isSortBySize);
+        this.adapter.replaceData(this.songs);
     }
 
     @Override
@@ -115,8 +114,8 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.songs_menu_sort:
-                isSortBySize = !isSortBySize;
-                loadAlbums();
+                this.isSortBySize = !this.isSortBySize;
+                this.loadAlbums();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -135,17 +134,17 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     @Override
     public void onStart() {
         super.onStart();
-        Intent intent = new Intent(getActivity(), PlayerService.class);
-        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this.getActivity(), PlayerService.class);
+        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (isServiceBound) {
-            playerService.removePlayerListener(this);
-            getActivity().unbindService(mConnection);
-            isServiceBound = false;
+        if (this.isServiceBound) {
+            this.playerService.removePlayerListener(this);
+            this.getActivity().unbindService(this.mConnection);
+            this.isServiceBound = false;
         }
     }
 
@@ -153,7 +152,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     public void onCreateContextMenu(ContextMenu menu, View view,
                                     ContextMenu.ContextMenuInfo info) {
         super.onCreateContextMenu(menu, view, info);
-        MenuInflater inflater = getActivity().getMenuInflater();
+        MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.list_context_menu, menu);
     }
 
@@ -163,43 +162,43 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
             case R.id.remove_from_list_item:
                 AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
                 int position = info.position;
-                Song song = songs.get(position);
-                removeSong(song);
+                Song song = this.songs.get(position);
+                this.removeSong(song);
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
     public void removeSong(Song song) {
-        adapter.deleteSong(song);
-        musicRepository.deleteSong(song);
+        this.adapter.deleteSong(song);
+        this.musicRepository.deleteSong(song);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             File file = new File(song.getPath());
             boolean deleted = file.delete();
             if (deleted) {
-                Toast.makeText(getContext(), R.string.delete_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getContext(), R.string.delete_failed, Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void setPlayingSong(boolean isPlaying, Song song) {
         if (isPlaying) {
-            int songIndex = songs.indexOf(song);
-            adapter.setPlayingSong(songIndex);
+            int songIndex = this.songs.indexOf(song);
+            this.adapter.setPlayingSong(songIndex);
         } else {
-            adapter.setPlayingSong(SongsListAdapter.INDEX_NOT_INIT);
+            this.adapter.setPlayingSong(SongsListAdapter.INDEX_NOT_INIT);
         }
     }
 
     @Override
     public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
-        setPlayingSong(isPlaying, song);
+        this.setPlayingSong(isPlaying, song);
     }
 
     @Override
     public void onStateChanged(boolean isPlaying, Song song) {
-        setPlayingSong(isPlaying, song);
+        this.setPlayingSong(isPlaying, song);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -208,14 +207,14 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            playerService = binder.getService();
-            playerService.addPlayerListener(SongsFragment.this);
-            isServiceBound = true;
+            SongsFragment.this.playerService = binder.getService();
+            SongsFragment.this.playerService.addPlayerListener(SongsFragment.this);
+            SongsFragment.this.isServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            isServiceBound = false;
+            SongsFragment.this.isServiceBound = false;
         }
     };
 

@@ -34,25 +34,25 @@ class SongsListAdapter extends BaseAdapter {
 
     SongsListAdapter(Album album, Activity activity) {
         this.activity = (FragmentActivity) activity;
-        layoutInflater = LayoutInflater.from(activity);
+        this.layoutInflater = LayoutInflater.from(activity);
         this.album = album;
-        songs = new ArrayList<>();
-        playingSongIndex = INDEX_NOT_INIT;
+        this.songs = new ArrayList<>();
+        this.playingSongIndex = INDEX_NOT_INIT;
     }
 
     void replaceData(List<Song> songs) {
         this.songs = new ArrayList<>(songs);
-        notifyDataSetChanged();
+        this.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return songs.size();
+        return this.songs.size();
     }
 
     @Override
     public Song getItem(int position) {
-        return songs.get(position);
+        return this.songs.get(position);
     }
 
     @Override
@@ -70,21 +70,21 @@ class SongsListAdapter extends BaseAdapter {
 
     void setPlayingSong(int playingSongIndex) {
         this.playingSongIndex = playingSongIndex;
-        notifyDataSetChanged();
+        this.notifyDataSetChanged();
     }
 
     void deleteSong(Song song) {
-        songs.remove(song);
-        notifyDataSetChanged();
+        this.songs.remove(song);
+        this.notifyDataSetChanged();
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final Song song = getItem(position);
+        final Song song = this.getItem(position);
         ViewHolder holder;
 
         if(view == null || view.getTag() == null) {
-            view = layoutInflater.inflate(R.layout.songs_list_item, parent, false);
+            view = this.layoutInflater.inflate(R.layout.songs_list_item, parent, false);
             holder = new ViewHolder();
 
             holder.songName = (TextView) view.findViewById(R.id.song_name);
@@ -93,18 +93,18 @@ class SongsListAdapter extends BaseAdapter {
             holder.playingIndicator = (ImageView) view.findViewById(R.id.song_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.song_image);
 
-            fillHolder(holder, song, position);
+            this.fillHolder(holder, song, position);
             view.setTag(holder);
-            activity.registerForContextMenu(view);
+            this.activity.registerForContextMenu(view);
         } else {
             holder = (ViewHolder) view.getTag();
-            fillHolder(holder, song, position);
+            this.fillHolder(holder, song, position);
         }
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UIUtils.openSongPlayer(song, songs, activity);
+                UIUtils.openSongPlayer(song, SongsListAdapter.this.songs, SongsListAdapter.this.activity);
             }
         });
 
@@ -120,16 +120,16 @@ class SongsListAdapter extends BaseAdapter {
 
     private void fillHolder(ViewHolder holder, Song song, int songIndex) {
         holder.songName.setText(song.getName());
-        holder.songArtist.setText(album.getArtist());
-        holder.songDuration.setText(formatDuration(song.getDuration()));
-        if(songIndex == playingSongIndex) {
-            Drawable drawable = ContextCompat.getDrawable(activity, R.drawable.playing_indicator);
+        holder.songArtist.setText(this.album.getArtist());
+        holder.songDuration.setText(this.formatDuration(song.getDuration()));
+        if(songIndex == this.playingSongIndex) {
+            Drawable drawable = ContextCompat.getDrawable(this.activity, R.drawable.playing_indicator);
             holder.playingIndicator.setImageDrawable(drawable);
         } else {
             holder.playingIndicator.setImageResource(android.R.color.transparent);
         }
         String songImageUrl = song.getImagePath();
-        Picasso.with(activity).load(songImageUrl).into(holder.albumCover);
+        Picasso.with(this.activity).load(songImageUrl).into(holder.albumCover);
     }
 
 

@@ -9,9 +9,7 @@ import android.support.annotation.Nullable;
 
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
-import com.vlad.player.data.source.IDbContext;
-import com.vlad.player.data.source.MusicRepository;
-import com.vlad.player.data.source.local.DbContext;
+import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.utils.MusicUtils;
 
 import java.io.File;
@@ -23,12 +21,11 @@ import java.util.List;
 public class SearchService extends Service {
 
     private final IBinder binder = new LocalBinder();
-    private final MusicRepository repository;
+    private final DbObservableContext repository;
     private boolean isSearchActive = false;
 
     public SearchService() {
-        IDbContext localDataSource = DbContext.getInstance(this);
-        this.repository = MusicRepository.getInstance(localDataSource);
+        this.repository = DbObservableContext.getInstance(this);
     }
 
     public class LocalBinder extends Binder {
@@ -148,7 +145,7 @@ public class SearchService extends Service {
                     Song song = new Song(songName, songPath, albumCover, songInfo.duration, album.getId());
                     songs.add(song);
                 }
-                SearchService.this.repository.saveAlbum(album, songs);
+                SearchService.this.repository.addAlbum(album, songs);
             }
 
             SearchService.this.isSearchActive = false;

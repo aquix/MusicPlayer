@@ -58,36 +58,36 @@ public class HeaderGridView extends GridView {
     }
     public HeaderGridView(Context context) {
         super(context);
-        initHeaderGridView();
+        this.initHeaderGridView();
     }
     public HeaderGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initHeaderGridView();
+        this.initHeaderGridView();
     }
     public HeaderGridView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        initHeaderGridView();
+        this.initHeaderGridView();
     }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        ListAdapter adapter = getAdapter();
+        ListAdapter adapter = this.getAdapter();
         if (adapter != null && adapter instanceof HeaderViewGridAdapter) {
-            ((HeaderViewGridAdapter) adapter).setNumColumns(getNumColumnsCompat());
+            ((HeaderViewGridAdapter) adapter).setNumColumns(this.getNumColumnsCompat());
         }
     }
 
     private int getNumColumnsCompat() {
         if (Build.VERSION.SDK_INT >= 11) {
-            return getNumColumnsCompat11();
+            return this.getNumColumnsCompat11();
 
         } else {
             int columns = 0;
-            int children = getChildCount();
+            int children = this.getChildCount();
             if (children > 0) {
-                int width = getChildAt(0).getMeasuredWidth();
+                int width = this.getChildAt(0).getMeasuredWidth();
                 if (width > 0) {
-                    columns = getWidth() / width;
+                    columns = this.getWidth() / width;
                 }
             }
             return columns > 0 ? columns : AUTO_FIT;
@@ -96,7 +96,7 @@ public class HeaderGridView extends GridView {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private int getNumColumnsCompat11() {
-        return getNumColumns();
+        return this.getNumColumns();
     }
 
     @Override
@@ -116,19 +116,19 @@ public class HeaderGridView extends GridView {
      * @param isSelectable whether the item is selectable
      */
     public void addHeaderView(View v, Object data, boolean isSelectable) {
-        ListAdapter adapter = getAdapter();
+        ListAdapter adapter = this.getAdapter();
         if (adapter != null && ! (adapter instanceof HeaderViewGridAdapter)) {
             throw new IllegalStateException(
                     "Cannot add header view to grid -- setAdapter has already been called.");
         }
         FixedViewInfo info = new FixedViewInfo();
-        FrameLayout fl = new FullWidthFixedViewLayout(getContext());
+        FrameLayout fl = new FullWidthFixedViewLayout(this.getContext());
         fl.addView(v);
         info.view = v;
         info.viewContainer = fl;
         info.data = data;
         info.isSelectable = isSelectable;
-        mHeaderViewInfos.add(info);
+        this.mHeaderViewInfos.add(info);
         // in the case of re-adding a header view, or adding one later on,
         // we need to notify the observer
         if (adapter != null) {
@@ -146,10 +146,10 @@ public class HeaderGridView extends GridView {
      * @param v The view to add.
      */
     public void addHeaderView(View v) {
-        addHeaderView(v, null, true);
+        this.addHeaderView(v, null, true);
     }
     public int getHeaderViewCount() {
-        return mHeaderViewInfos.size();
+        return this.mHeaderViewInfos.size();
     }
     /**
      * Removes a previously-added header view.
@@ -159,13 +159,13 @@ public class HeaderGridView extends GridView {
      *         view
      */
     public boolean removeHeaderView(View v) {
-        if (mHeaderViewInfos.size() > 0) {
+        if (this.mHeaderViewInfos.size() > 0) {
             boolean result = false;
-            ListAdapter adapter = getAdapter();
+            ListAdapter adapter = this.getAdapter();
             if (adapter != null && ((HeaderViewGridAdapter) adapter).removeHeader(v)) {
                 result = true;
             }
-            removeFixedViewInfo(v, mHeaderViewInfos);
+            this.removeFixedViewInfo(v, this.mHeaderViewInfos);
             return result;
         }
         return false;
@@ -182,9 +182,9 @@ public class HeaderGridView extends GridView {
     }
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (mHeaderViewInfos.size() > 0) {
-            HeaderViewGridAdapter hadapter = new HeaderViewGridAdapter(mHeaderViewInfos, adapter);
-            int numColumns = getNumColumnsCompat();
+        if (this.mHeaderViewInfos.size() > 0) {
+            HeaderViewGridAdapter hadapter = new HeaderViewGridAdapter(this.mHeaderViewInfos, adapter);
+            int numColumns = this.getNumColumnsCompat();
             if (numColumns > 1) {
                 hadapter.setNumColumns(numColumns);
             }
@@ -225,28 +225,28 @@ public class HeaderGridView extends GridView {
         boolean mAreAllFixedViewsSelectable;
         private final boolean mIsFilterable;
         HeaderViewGridAdapter(ArrayList<FixedViewInfo> headerViewInfos, ListAdapter adapter) {
-            mAdapter = adapter;
-            mIsFilterable = adapter instanceof Filterable;
+            this.mAdapter = adapter;
+            this.mIsFilterable = adapter instanceof Filterable;
             if (headerViewInfos == null) {
                 throw new IllegalArgumentException("headerViewInfos cannot be null");
             }
-            mHeaderViewInfos = headerViewInfos;
-            mAreAllFixedViewsSelectable = areAllListInfosSelectable(mHeaderViewInfos);
+            this.mHeaderViewInfos = headerViewInfos;
+            this.mAreAllFixedViewsSelectable = this.areAllListInfosSelectable(this.mHeaderViewInfos);
         }
         int getHeadersCount() {
-            return mHeaderViewInfos.size();
+            return this.mHeaderViewInfos.size();
         }
         @Override
         public boolean isEmpty() {
-            return (mAdapter == null || mAdapter.isEmpty()) && getHeadersCount() == 0;
+            return (this.mAdapter == null || this.mAdapter.isEmpty()) && this.getHeadersCount() == 0;
         }
         void setNumColumns(int numColumns) {
             if (numColumns < 1) {
                 throw new IllegalArgumentException("Number of columns must be 1 or more");
             }
-            if (mNumColumns != numColumns) {
-                mNumColumns = numColumns;
-                notifyDataSetChanged();
+            if (this.mNumColumns != numColumns) {
+                this.mNumColumns = numColumns;
+                this.notifyDataSetChanged();
             }
         }
         private boolean areAllListInfosSelectable(ArrayList<FixedViewInfo> infos) {
@@ -260,12 +260,12 @@ public class HeaderGridView extends GridView {
             return true;
         }
         boolean removeHeader(View v) {
-            for (int i = 0; i < mHeaderViewInfos.size(); i++) {
-                FixedViewInfo info = mHeaderViewInfos.get(i);
+            for (int i = 0; i < this.mHeaderViewInfos.size(); i++) {
+                FixedViewInfo info = this.mHeaderViewInfos.get(i);
                 if (info.view == v) {
-                    mHeaderViewInfos.remove(i);
-                    mAreAllFixedViewsSelectable = areAllListInfosSelectable(mHeaderViewInfos);
-                    mDataSetObservable.notifyChanged();
+                    this.mHeaderViewInfos.remove(i);
+                    this.mAreAllFixedViewsSelectable = this.areAllListInfosSelectable(this.mHeaderViewInfos);
+                    this.mDataSetObservable.notifyChanged();
                     return true;
                 }
             }
@@ -274,33 +274,33 @@ public class HeaderGridView extends GridView {
 
         @Override
         public int getCount() {
-            if (mAdapter != null) {
-                return getHeadersCount() * mNumColumns + mAdapter.getCount();
+            if (this.mAdapter != null) {
+                return this.getHeadersCount() * this.mNumColumns + this.mAdapter.getCount();
             } else {
-                return getHeadersCount() * mNumColumns;
+                return this.getHeadersCount() * this.mNumColumns;
             }
         }
 
         @Override
         public boolean areAllItemsEnabled() {
-            return mAdapter == null || mAreAllFixedViewsSelectable && mAdapter.areAllItemsEnabled();
+            return this.mAdapter == null || this.mAreAllFixedViewsSelectable && this.mAdapter.areAllItemsEnabled();
         }
 
         @Override
         public boolean isEnabled(int position) {
             // Header (negative positions will throw an ArrayIndexOutOfBoundsException)
-            int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
+            int numHeadersAndPlaceholders = this.getHeadersCount() * this.mNumColumns;
             if (position < numHeadersAndPlaceholders) {
-                return (position % mNumColumns == 0)
-                        && mHeaderViewInfos.get(position / mNumColumns).isSelectable;
+                return (position % this.mNumColumns == 0)
+                        && this.mHeaderViewInfos.get(position / this.mNumColumns).isSelectable;
             }
             // Adapter
             final int adjPosition = position - numHeadersAndPlaceholders;
             int adapterCount;
-            if (mAdapter != null) {
-                adapterCount = mAdapter.getCount();
+            if (this.mAdapter != null) {
+                adapterCount = this.mAdapter.getCount();
                 if (adjPosition < adapterCount) {
-                    return mAdapter.isEnabled(adjPosition);
+                    return this.mAdapter.isEnabled(adjPosition);
                 }
             }
             throw new ArrayIndexOutOfBoundsException(position);
@@ -309,20 +309,20 @@ public class HeaderGridView extends GridView {
         @Override
         public Object getItem(int position) {
             // Header (negative positions will throw an ArrayIndexOutOfBoundsException)
-            int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
+            int numHeadersAndPlaceholders = this.getHeadersCount() * this.mNumColumns;
             if (position < numHeadersAndPlaceholders) {
-                if (position % mNumColumns == 0) {
-                    return mHeaderViewInfos.get(position / mNumColumns).data;
+                if (position % this.mNumColumns == 0) {
+                    return this.mHeaderViewInfos.get(position / this.mNumColumns).data;
                 }
                 return null;
             }
             // Adapter
             final int adjPosition = position - numHeadersAndPlaceholders;
             int adapterCount;
-            if (mAdapter != null) {
-                adapterCount = mAdapter.getCount();
+            if (this.mAdapter != null) {
+                adapterCount = this.mAdapter.getCount();
                 if (adjPosition < adapterCount) {
-                    return mAdapter.getItem(adjPosition);
+                    return this.mAdapter.getItem(adjPosition);
                 }
             }
             throw new ArrayIndexOutOfBoundsException(position);
@@ -330,12 +330,12 @@ public class HeaderGridView extends GridView {
 
         @Override
         public long getItemId(int position) {
-            int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
-            if (mAdapter != null && position >= numHeadersAndPlaceholders) {
+            int numHeadersAndPlaceholders = this.getHeadersCount() * this.mNumColumns;
+            if (this.mAdapter != null && position >= numHeadersAndPlaceholders) {
                 int adjPosition = position - numHeadersAndPlaceholders;
-                int adapterCount = mAdapter.getCount();
+                int adapterCount = this.mAdapter.getCount();
                 if (adjPosition < adapterCount) {
-                    return mAdapter.getItemId(adjPosition);
+                    return this.mAdapter.getItemId(adjPosition);
                 }
             }
             return -1;
@@ -343,16 +343,16 @@ public class HeaderGridView extends GridView {
 
         @Override
         public boolean hasStableIds() {
-            return mAdapter != null && mAdapter.hasStableIds();
+            return this.mAdapter != null && this.mAdapter.hasStableIds();
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns ;
+            int numHeadersAndPlaceholders = this.getHeadersCount() * this.mNumColumns;
             if (position < numHeadersAndPlaceholders) {
-                View headerViewContainer = mHeaderViewInfos
-                        .get(position / mNumColumns).viewContainer;
-                if (position % mNumColumns == 0) {
+                View headerViewContainer = this.mHeaderViewInfos
+                        .get(position / this.mNumColumns).viewContainer;
+                if (position % this.mNumColumns == 0) {
                     return headerViewContainer;
                 } else {
                     if (convertView == null) {
@@ -367,10 +367,10 @@ public class HeaderGridView extends GridView {
 
             final int adjPosition = position - numHeadersAndPlaceholders;
             int adapterCount;
-            if (mAdapter != null) {
-                adapterCount = mAdapter.getCount();
+            if (this.mAdapter != null) {
+                adapterCount = this.mAdapter.getCount();
                 if (adjPosition < adapterCount) {
-                    return mAdapter.getView(adjPosition, convertView, parent);
+                    return this.mAdapter.getView(adjPosition, convertView, parent);
                 }
             }
             throw new ArrayIndexOutOfBoundsException(position);
@@ -378,53 +378,53 @@ public class HeaderGridView extends GridView {
 
         @Override
         public int getItemViewType(int position) {
-            int numHeadersAndPlaceholders = getHeadersCount() * mNumColumns;
-            if (position < numHeadersAndPlaceholders && (position % mNumColumns != 0)) {
-                return mAdapter != null ? mAdapter.getViewTypeCount() : 1;
+            int numHeadersAndPlaceholders = this.getHeadersCount() * this.mNumColumns;
+            if (position < numHeadersAndPlaceholders && (position % this.mNumColumns != 0)) {
+                return this.mAdapter != null ? this.mAdapter.getViewTypeCount() : 1;
             }
-            if (mAdapter != null && position >= numHeadersAndPlaceholders) {
+            if (this.mAdapter != null && position >= numHeadersAndPlaceholders) {
                 int adjPosition = position - numHeadersAndPlaceholders;
-                int adapterCount = mAdapter.getCount();
+                int adapterCount = this.mAdapter.getCount();
                 if (adjPosition < adapterCount) {
-                    return mAdapter.getItemViewType(adjPosition);
+                    return this.mAdapter.getItemViewType(adjPosition);
                 }
             }
             return AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
         }
         @Override
         public int getViewTypeCount() {
-            if (mAdapter != null) {
-                return mAdapter.getViewTypeCount() + 1;
+            if (this.mAdapter != null) {
+                return this.mAdapter.getViewTypeCount() + 1;
             }
             return 2;
         }
         @Override
         public void registerDataSetObserver(DataSetObserver observer) {
-            mDataSetObservable.registerObserver(observer);
-            if (mAdapter != null) {
-                mAdapter.registerDataSetObserver(observer);
+            this.mDataSetObservable.registerObserver(observer);
+            if (this.mAdapter != null) {
+                this.mAdapter.registerDataSetObserver(observer);
             }
         }
         @Override
         public void unregisterDataSetObserver(DataSetObserver observer) {
-            mDataSetObservable.unregisterObserver(observer);
-            if (mAdapter != null) {
-                mAdapter.unregisterDataSetObserver(observer);
+            this.mDataSetObservable.unregisterObserver(observer);
+            if (this.mAdapter != null) {
+                this.mAdapter.unregisterDataSetObserver(observer);
             }
         }
         @Override
         public Filter getFilter() {
-            if (mIsFilterable) {
-                return ((Filterable) mAdapter).getFilter();
+            if (this.mIsFilterable) {
+                return ((Filterable) this.mAdapter).getFilter();
             }
             return null;
         }
         @Override
         public ListAdapter getWrappedAdapter() {
-            return mAdapter;
+            return this.mAdapter;
         }
         void notifyDataSetChanged() {
-            mDataSetObservable.notifyChanged();
+            this.mDataSetObservable.notifyChanged();
         }
     }
 }

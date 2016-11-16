@@ -26,7 +26,7 @@ import com.vlad.player.R;
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
 import com.vlad.player.data.source.IDbContext;
-import com.vlad.player.data.source.MusicRepository;
+import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.data.source.local.DbContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.ui.view.HeaderGridView;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlbumsFragment extends Fragment implements
-        MusicRepository.AlbumsRepositoryObserver,
+        DbObservableContext.AlbumsRepositoryObserver,
         PlayerService.PlayerCallback {
 
     static {
@@ -52,7 +52,7 @@ public class AlbumsFragment extends Fragment implements
 
     private AlbumsListAdapter albumsListAdapter;
     private AlbumsRecentAdapter albumsRecentAdapter;
-    private MusicRepository musicRepository;
+    private DbObservableContext musicRepository;
     private Handler mainHandler;
 
     private PlayerService playerService;
@@ -69,16 +69,15 @@ public class AlbumsFragment extends Fragment implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IDbContext localDataSource = DbContext.getInstance(getContext());
-        musicRepository = MusicRepository.getInstance(localDataSource);
-        musicRepository.addContentObserver(this);
-        ArrayList<Integer> durations = musicRepository.printAllSongs();
-        checkJNI(durations);
+        this.musicRepository = DbObservableContext.getInstance(this.getContext());
+        this.musicRepository.addContentObserver(this);
+        ArrayList<Integer> durations = this.musicRepository.printAllSongs();
+        this.checkJNI(durations);
         Log.d(TAG_LIFECYCLE, "onCreate");
     }
 
     private void checkJNI(ArrayList<Integer> durations) {
-        long result = sum(durations);
+        long result = this.sum(durations);
         Log.d("JNI all songs duration", Long.toString(result));
 
         long startTime = System.currentTimeMillis();
@@ -99,19 +98,19 @@ public class AlbumsFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.albums_fragment, container, false);
-        header = inflater.inflate(R.layout.albums_list_footer, container, false);
+        this.header = inflater.inflate(R.layout.albums_list_footer, container, false);
 
 
         HeaderGridView albumsGrid = (HeaderGridView) view.findViewById(R.id.albums_grid);
-        setColumnsCount(albumsGrid);
-        albumsListAdapter = new AlbumsListAdapter(getActivity());
-        addRecentSongsHeader(albumsGrid);
-        albumsGrid.setAdapter(albumsListAdapter);
-        loadAlbums();
+        this.setColumnsCount(albumsGrid);
+        this.albumsListAdapter = new AlbumsListAdapter(this.getActivity());
+        this.addRecentSongsHeader(albumsGrid);
+        albumsGrid.setAdapter(this.albumsListAdapter);
+        this.loadAlbums();
 
-        registerForContextMenu(albumsGrid);
+        this.registerForContextMenu(albumsGrid);
 
-        mainHandler = new Handler(getContext().getMainLooper());
+        this.mainHandler = new Handler(this.getContext().getMainLooper());
 
         Log.d(TAG_LIFECYCLE, "onCreateView");
 
@@ -121,25 +120,25 @@ public class AlbumsFragment extends Fragment implements
     private void addRecentSongsHeader(HeaderGridView albumsGrid) {
         List<Song> recentSongs = MusicUtils.getRecent();
         LinearLayoutManager layoutManager
-                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView songsList = (RecyclerView) header.findViewById(R.id.recent_songs);
+                = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView songsList = (RecyclerView) this.header.findViewById(R.id.recent_songs);
         songsList.setLayoutManager(layoutManager);
 
-        albumsRecentAdapter = new AlbumsRecentAdapter(recentSongs, getContext());
-        songsList.setAdapter(albumsRecentAdapter);
+        this.albumsRecentAdapter = new AlbumsRecentAdapter(recentSongs, this.getContext());
+        songsList.setAdapter(this.albumsRecentAdapter);
         if(recentSongs.isEmpty()) {
-            header.setVisibility(View.GONE);
+            this.header.setVisibility(View.GONE);
         }
-        albumsGrid.addHeaderView(header);
+        albumsGrid.addHeaderView(this.header);
     }
 
     private void loadAlbums() {
-        albums = musicRepository.getAlbums();
-        albumsListAdapter.replaceData(albums);
+        this.albums = this.musicRepository.getAlbums();
+        this.albumsListAdapter.replaceData(this.albums);
     }
 
     private void setColumnsCount(HeaderGridView albumsGrid) {
-        int orientation = getResources().getConfiguration().orientation;
+        int orientation = this.getResources().getConfiguration().orientation;
         if(orientation == Configuration.ORIENTATION_PORTRAIT) {
             albumsGrid.setNumColumns(PORTRAIT_COLUMNS_COUNT);
         } else {
@@ -149,10 +148,10 @@ public class AlbumsFragment extends Fragment implements
 
     @Override
     public void onAlbumsChanged() {
-        mainHandler.post(new Runnable() {
+        this.mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                loadAlbums();
+                AlbumsFragment.this.loadAlbums();
             }
         });
     }
@@ -160,13 +159,13 @@ public class AlbumsFragment extends Fragment implements
     @Override
     public void onStart() {
         super.onStart();
-        Intent intent = new Intent(getActivity(), PlayerService.class);
-        getActivity().startService(intent);
-        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(this.getActivity(), PlayerService.class);
+        this.getActivity().startService(intent);
+        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
 
         if (!MusicUtils.getRecent().isEmpty()) {
-            header.setVisibility(View.VISIBLE);
-            albumsRecentAdapter.notifyDataSetChanged();
+            this.header.setVisibility(View.VISIBLE);
+            this.albumsRecentAdapter.notifyDataSetChanged();
         }
         Log.d(TAG_LIFECYCLE, "onStart");
     }
@@ -174,12 +173,12 @@ public class AlbumsFragment extends Fragment implements
     @Override
     public void onStop() {
         super.onStop();
-        if (isServiceBound) {
-            playerService.removePlayerListener(this);
-            getActivity().unbindService(mConnection);
-            isServiceBound = false;
+        if (this.isServiceBound) {
+            this.playerService.removePlayerListener(this);
+            this.getActivity().unbindService(this.mConnection);
+            this.isServiceBound = false;
         }
-        musicRepository.removeContentObserver(this);
+        this.musicRepository.removeContentObserver(this);
         Log.d(TAG_LIFECYCLE, "onStop");
     }
 
@@ -187,7 +186,7 @@ public class AlbumsFragment extends Fragment implements
     public void onCreateContextMenu(ContextMenu menu, View view,
                                     ContextMenu.ContextMenuInfo info) {
         super.onCreateContextMenu(menu, view, info);
-        MenuInflater inflater = getActivity().getMenuInflater();
+        MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.list_context_menu, menu);
     }
 
@@ -197,9 +196,9 @@ public class AlbumsFragment extends Fragment implements
             case R.id.remove_from_list_item:
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 int position = info.position - 2;
-                Album album = albums.get(position);
-                albumsListAdapter.removeAlbum(album);
-                musicRepository.deleteAlbum(album);
+                Album album = this.albums.get(position);
+                this.albumsListAdapter.removeAlbum(album);
+                this.musicRepository.deleteAlbum(album);
                 break;
         }
         return super.onContextItemSelected(item);
@@ -207,20 +206,20 @@ public class AlbumsFragment extends Fragment implements
 
     private void setActiveAlbum(boolean isPlaying, Song song) {
         if (isPlaying) {
-            albumsListAdapter.setPlayingAlbum(song.getAlbumId());
+            this.albumsListAdapter.setPlayingAlbum(song.getAlbumId());
         } else {
-            albumsListAdapter.setPlayingAlbum(null);
+            this.albumsListAdapter.setPlayingAlbum(null);
         }
     }
 
     @Override
     public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
-        setActiveAlbum(isPlaying, song);
+        this.setActiveAlbum(isPlaying, song);
     }
 
     @Override
     public void onStateChanged(boolean isPlaying, Song song) {
-        setActiveAlbum(isPlaying, song);
+        this.setActiveAlbum(isPlaying, song);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -229,14 +228,14 @@ public class AlbumsFragment extends Fragment implements
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            playerService = binder.getService();
-            playerService.addPlayerListener(AlbumsFragment.this);
-            isServiceBound = true;
+            AlbumsFragment.this.playerService = binder.getService();
+            AlbumsFragment.this.playerService.addPlayerListener(AlbumsFragment.this);
+            AlbumsFragment.this.isServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            isServiceBound = false;
+            AlbumsFragment.this.isServiceBound = false;
         }
     };
 

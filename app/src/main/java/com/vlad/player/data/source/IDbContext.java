@@ -10,19 +10,19 @@ import java.util.List;
 
 public interface IDbContext {
 
-    boolean saveAlbum(@NonNull Album album, @NonNull List<Song> songs);
-
-    void saveSongs(@NonNull List<Song> songs);
-
-    void deleteAlbum(@NonNull Album album);
-
-    void deleteSong(@NonNull Song song);
-
     @NonNull
     List<Album> getAlbums();
 
     @NonNull
     List<Song> getSongs(@NonNull String albumId, boolean sortByName);
+
+    boolean addAlbum(@NonNull Album album, @NonNull List<Song> songs);
+
+    void addSongs(@NonNull List<Song> songs);
+
+    void deleteAlbum(@NonNull Album album);
+
+    void deleteSong(@NonNull Song song);
 
     ArrayList<Integer> printAllSongs();
 

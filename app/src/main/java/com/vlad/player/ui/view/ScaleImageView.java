@@ -15,33 +15,33 @@ public class ScaleImageView extends ImageView {
 
     public ScaleImageView(Context context) {
         super(context);
-        init();
+        this.init();
     }
 
     public ScaleImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        this.init();
     }
 
     public ScaleImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init();
+        this.init();
     }
 
     private void init() {
-        gestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        this.gestureDetector = new ScaleGestureDetector(this.getContext(), new ScaleListener());
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        gestureDetector.onTouchEvent(ev);
+        this.gestureDetector.onTouchEvent(ev);
         return true;
     }
 
     @Override
     public void onDraw(Canvas canvas) {
         canvas.save();
-        canvas.scale(mScaleFactor, mScaleFactor, getWidth() / 2, getHeight() / 2);
+        canvas.scale(this.mScaleFactor, this.mScaleFactor, this.getWidth() / 2, this.getHeight() / 2);
         super.onDraw(canvas);
         canvas.restore();
     }
@@ -49,10 +49,10 @@ public class ScaleImageView extends ImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor *= detector.getScaleFactor();
-            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 1.0f));
+            ScaleImageView.this.mScaleFactor *= detector.getScaleFactor();
+            ScaleImageView.this.mScaleFactor = Math.max(0.1f, Math.min(ScaleImageView.this.mScaleFactor, 1.0f));
 
-            invalidate();
+            ScaleImageView.this.invalidate();
             return true;
         }
     }

@@ -15,10 +15,10 @@ public class SongsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getIntent().getExtras();
-        setContentView(R.layout.songs_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        Bundle bundle = this.getIntent().getExtras();
+        this.setContentView(R.layout.songs_activity);
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
 
         Album album =  null;
         Song openedSong = null;
@@ -32,10 +32,10 @@ public class SongsActivity extends AppCompatActivity {
         }
 
         SongsFragment songsFragment =
-                (SongsFragment) getSupportFragmentManager().findFragmentByTag(Constants.SONGS_FRAGMENT_TAG);
+                (SongsFragment) this.getSupportFragmentManager().findFragmentByTag(Constants.SONGS_FRAGMENT_TAG);
         if (songsFragment == null) {
             songsFragment = SongsFragment.newInstance(album, openedSong);
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.content_frame, songsFragment, Constants.SONGS_FRAGMENT_TAG);
             transaction.commit();
         }

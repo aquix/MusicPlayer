@@ -37,24 +37,24 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        final Song song = songs.get(i);
-        String coverUrl = songs.get(i).getImagePath();
+        final Song song = this.songs.get(i);
+        String coverUrl = this.songs.get(i).getImagePath();
 
         viewHolder.songName.setText(song.getName());
-        Picasso.with(context).load(coverUrl).into(viewHolder.cover);
+        Picasso.with(this.context).load(coverUrl).into(viewHolder.cover);
         viewHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent songIntent = new Intent(context, SongsActivity.class);
+                Intent songIntent = new Intent(AlbumsRecentAdapter.this.context, SongsActivity.class);
                 songIntent.putExtra(Constants.SONG_BUNDLE.OPENED_SONG, song);
-                context.startActivity(songIntent);
+                AlbumsRecentAdapter.this.context.startActivity(songIntent);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return songs.size();
+        return this.songs.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -64,9 +64,9 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
 
         ViewHolder(View itemView) {
             super(itemView);
-            view = itemView;
-            cover = (ImageView) itemView.findViewById(R.id.album_cover);
-            songName = (TextView) itemView.findViewById(R.id.album_name);
+            this.view = itemView;
+            this.cover = (ImageView) itemView.findViewById(R.id.album_cover);
+            this.songName = (TextView) itemView.findViewById(R.id.album_name);
 
         }
     }
