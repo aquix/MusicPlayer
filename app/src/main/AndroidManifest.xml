@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fisko.music">
+    package="com.vlad.player">
     
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -12,26 +12,26 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.albums.AlbumsActivity">
+        <activity android:name="com.vlad.player.ui.albums.AlbumsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.songs.SongsActivity"
+        <activity android:name="com.vlad.player.ui.songs.SongsActivity"
             android:exported="false"
-            android:parentActivityName=".ui.albums.AlbumsActivity"
+            android:parentActivityName="com.vlad.player.ui.albums.AlbumsActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.albums.AlbumsActivity" />
+                android:value="com.vlad.player.ui.albums.AlbumsActivity" />
         </activity>
 
-        <service android:name=".service.PlayerService"
+        <service android:name="com.vlad.player.service.PlayerService"
             android:exported="false"/>
 
-        <service android:name=".service.SearchService"
+        <service android:name="com.vlad.player.service.SearchService"
             android:exported="false"/>
     </application>
 

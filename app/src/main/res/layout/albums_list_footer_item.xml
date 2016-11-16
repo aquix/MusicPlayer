@@ -8,7 +8,7 @@
     android:layout_marginStart="10dp" >
 
 
-    <com.fisko.music.ui.view.SquareItemView
+    <com.vlad.player.ui.view.SquareItemView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/album_cover"

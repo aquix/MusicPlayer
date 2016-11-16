@@ -32,7 +32,7 @@ jobject vectorToArrayList(std::vector<std::string> vector);
 
 extern "C"
 jlong
-Java_com_fisko_music_ui_albums_AlbumsFragment_sum(
+Java_com_vlad_player_ui_albums_AlbumsFragment_sum(
         JNIEnv* env,
         jobject /* this */,
         jobject arrayList) {

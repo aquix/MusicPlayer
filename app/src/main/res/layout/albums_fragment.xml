@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.fisko.music.ui.view.HeaderGridView
+    <com.vlad.player.ui.view.HeaderGridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:verticalSpacing="5dp"
