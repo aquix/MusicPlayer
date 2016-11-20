@@ -1,4 +1,4 @@
-package com.vlad.player.data.source.local;
+package com.vlad.player.data.source;
 
 
 import android.provider.BaseColumns;

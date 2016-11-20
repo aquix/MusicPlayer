@@ -9,9 +9,8 @@ import android.widget.ImageView;
 
 
 public class ScaleImageView extends ImageView {
-
     private ScaleGestureDetector gestureDetector;
-    private float mScaleFactor = 1.f;
+    private float scaleFactor = 1.f;
 
     public ScaleImageView(Context context) {
         super(context);
@@ -41,7 +40,7 @@ public class ScaleImageView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         canvas.save();
-        canvas.scale(this.mScaleFactor, this.mScaleFactor, this.getWidth() / 2, this.getHeight() / 2);
+        canvas.scale(this.scaleFactor, this.scaleFactor, this.getWidth() / 2, this.getHeight() / 2);
         super.onDraw(canvas);
         canvas.restore();
     }
@@ -49,8 +48,8 @@ public class ScaleImageView extends ImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            ScaleImageView.this.mScaleFactor *= detector.getScaleFactor();
-            ScaleImageView.this.mScaleFactor = Math.max(0.1f, Math.min(ScaleImageView.this.mScaleFactor, 1.0f));
+            ScaleImageView.this.scaleFactor *= detector.getScaleFactor();
+            ScaleImageView.this.scaleFactor = Math.max(0.1f, Math.min(ScaleImageView.this.scaleFactor, 1.0f));
 
             ScaleImageView.this.invalidate();
             return true;

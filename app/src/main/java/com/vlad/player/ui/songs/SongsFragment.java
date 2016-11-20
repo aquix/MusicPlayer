@@ -24,18 +24,15 @@ import android.widget.Toast;
 import com.vlad.player.R;
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
-import com.vlad.player.data.source.IDbContext;
 import com.vlad.player.data.source.DbObservableContext;
-import com.vlad.player.data.source.local.DbContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
-import com.vlad.player.utils.UIUtils;
+import com.vlad.player.utils.UiUtils;
 
 import java.io.File;
 import java.util.List;
 
 public class SongsFragment extends Fragment implements PlayerService.PlayerCallback {
-
     private Album album;
 
     private SongsListAdapter adapter;
@@ -72,7 +69,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
 
         if(openedSong != null) {
             List<Song> songs = this.musicRepository.getSongs(this.album.getId(), this.isSortBySize);
-            UIUtils.openSongPlayer(openedSong, songs, this.getActivity());
+            UiUtils.openSongPlayer(openedSong, songs, this.getActivity());
         }
     }
 
@@ -81,7 +78,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
                              Bundle savedInstanceState) {
         this.setHasOptionsMenu(true);
         View view  = inflater.inflate(R.layout.songs_fragment, container, false);
-        UIUtils.setUpToolbar(true, this.album.getName() ,(AppCompatActivity) this.getActivity());
+        UiUtils.setUpToolbar(true, this.album.getName() ,(AppCompatActivity) this.getActivity());
 
         ListView albumsList = (ListView) view.findViewById(R.id.songs_list);
         this.adapter = new SongsListAdapter(this.album, this.getActivity());
@@ -187,7 +184,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
             int songIndex = this.songs.indexOf(song);
             this.adapter.setPlayingSong(songIndex);
         } else {
-            this.adapter.setPlayingSong(SongsListAdapter.INDEX_NOT_INIT);
+            this.adapter.setPlayingSong(-1);
         }
     }
 

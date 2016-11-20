@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.vlad.player.R;
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
-import com.vlad.player.utils.UIUtils;
+import com.vlad.player.utils.UiUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -22,22 +22,18 @@ import java.util.List;
 import java.util.Locale;
 
 class SongsListAdapter extends BaseAdapter {
-
-    static final int INDEX_NOT_INIT = -1;
-
     private FragmentActivity activity;
     private LayoutInflater layoutInflater;
     private ArrayList<Song> songs;
     private Album album;
     private int playingSongIndex;
 
-
     SongsListAdapter(Album album, Activity activity) {
         this.activity = (FragmentActivity) activity;
         this.layoutInflater = LayoutInflater.from(activity);
         this.album = album;
         this.songs = new ArrayList<>();
-        this.playingSongIndex = INDEX_NOT_INIT;
+        this.playingSongIndex = -1;
     }
 
     void replaceData(List<Song> songs) {
@@ -104,7 +100,7 @@ class SongsListAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UIUtils.openSongPlayer(song, SongsListAdapter.this.songs, SongsListAdapter.this.activity);
+                UiUtils.openSongPlayer(song, SongsListAdapter.this.songs, SongsListAdapter.this.activity);
             }
         });
 

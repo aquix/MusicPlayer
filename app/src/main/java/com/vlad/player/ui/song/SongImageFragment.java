@@ -13,12 +13,11 @@ import com.squareup.picasso.Picasso;
 
 
 public class SongImageFragment extends Fragment {
-
     static final String SONG_INSTANCE = "SONG_INSTANCE";
 
     private Song song;
 
-    public SongImageFragment () {}
+    public SongImageFragment () { }
 
     public static SongImageFragment newInstance(Song song) {
         SongImageFragment fragment = new SongImageFragment();

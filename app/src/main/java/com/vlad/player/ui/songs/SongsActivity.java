@@ -11,7 +11,6 @@ import com.vlad.player.data.Song;
 import com.vlad.player.utils.Constants;
 
 public class SongsActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +25,7 @@ public class SongsActivity extends AppCompatActivity {
             album = bundle.getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
             openedSong = bundle.getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
+
         if (savedInstanceState != null) {
             album = savedInstanceState.getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
             openedSong = savedInstanceState.getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);

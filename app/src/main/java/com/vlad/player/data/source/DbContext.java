@@ -1,4 +1,4 @@
-package com.vlad.player.data.source.local;
+package com.vlad.player.data.source;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,9 +9,8 @@ import android.util.Log;
 
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
-import com.vlad.player.data.source.IDbContext;
-import com.vlad.player.data.source.local.DbConstants.AlbumEntity;
-import com.vlad.player.data.source.local.DbConstants.SongEntity;
+import com.vlad.player.data.source.DbConstants.AlbumEntity;
+import com.vlad.player.data.source.DbConstants.SongEntity;
 
 import java.util.ArrayList;
 import java.util.List;

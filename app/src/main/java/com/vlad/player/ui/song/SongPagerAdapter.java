@@ -10,21 +10,20 @@ import com.vlad.player.data.Song;
 import java.util.List;
 
 class SongPagerAdapter extends FragmentPagerAdapter {
-
     private List<Song> songs;
 
-    SongPagerAdapter(List<Song> songs, FragmentManager fm) {
-        super(fm);
+    SongPagerAdapter(List<Song> songs, FragmentManager fragmentManager) {
+        super(fragmentManager);
         this.songs = songs;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return SongImageFragment.newInstance(songs.get(position));
+        return SongImageFragment.newInstance(this.songs.get(position));
     }
 
     @Override
     public int getCount() {
-        return songs.size();
+        return this.songs.size();
     }
 }

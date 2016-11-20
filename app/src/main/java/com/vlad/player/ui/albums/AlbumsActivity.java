@@ -22,7 +22,6 @@ import com.vlad.player.R;
 import com.vlad.player.service.SearchService;
 
 public class AlbumsActivity extends AppCompatActivity {
-
     private static String[] PERMISSIONS;
 
     static {
@@ -33,7 +32,6 @@ public class AlbumsActivity extends AppCompatActivity {
             };
         }
     }
-
 
     private SearchService searchService;
     private boolean isServiceBound;

@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\src",
+    "\\app\\src\\main",
+    "\\app\\src\\main\\java",
+    "\\app\\src\\main\\java\\com",
+    "\\app\\src\\main\\java\\com\\vlad",
+    "\\app\\src\\main\\java\\com\\vlad\\player",
+    "\\app\\src\\main\\java\\com\\vlad\\player\\service"
+  ],
+  "SelectedNode": "\\app\\src\\main\\java\\com\\vlad\\player\\service\\PlayerService.java",
+  "PreviewInSolutionExplorer": false
+}

@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SearchService extends Service {
-
     private final IBinder binder = new LocalBinder();
     private final DbObservableContext repository;
     private boolean isSearchActive = false;
@@ -46,60 +45,13 @@ public class SearchService extends Service {
     }
 
     public void startMusicSearch() {
-        if (!this.isSearchActive()) {
-            MusicSearcher searcher = new MusicSearcher();
+        if (!this.isSearchActive) {
+            MusicSearcherThread searcher = new MusicSearcherThread();
             new Thread(searcher).start();
         }
     }
 
-
-    public boolean isSearchActive() {
-        return this.isSearchActive;
-    }
-
-
-    private class MusicSearcher implements Runnable {
-
-//        ExecutorService mExecutor;
-//
-//        MusicSearcher() {
-//            mExecutor = Executors.newSingleThreadExecutor();
-//        }
-//
-//        private class SongImageSearcher implements Callable<String> {
-//            private MusicUtils.SongInfo mSongInfo;
-//
-//            SongImageSearcher(MusicUtils.SongInfo songInfo) {
-//                mSongInfo = songInfo;
-//            }
-//
-//            @Override
-//            public String call() throws Exception {
-//                String requestUrl = NetworkUtils.genAlbomInfoUrl(mSongInfo);
-//                JSONObject json = NetworkUtils.loadURL(requestUrl);
-//                assert json != null;
-//                return json.getJSONObject("album").getString("medium");
-//            }
-//        }
-
-        private void iterateFiles(File[] files, HashMap<String, List<String>> music) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    this.iterateFiles(file.listFiles(), music);
-                } else {
-                    String name = file.getName();
-                    if (name.endsWith(".mp3")) {
-                        String dirPath = file.getParent();
-                        if (!music.containsKey(dirPath)) {
-                            music.put(dirPath, new LinkedList<String>());
-                        }
-                        List<String> songNames = music.get(dirPath);
-                        songNames.add(name);
-                    }
-                }
-            }
-        }
-
+    private class MusicSearcherThread implements Runnable {
         @Override
         public void run() {
             File musicFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
@@ -123,16 +75,6 @@ public class SearchService extends Service {
 
                 MusicUtils.SongInfo firstSongInfo = songsInfo.get(0);
 
-//                Callable<String> callable = new SongImageSearcher(firstSongInfo);
-//                Future<String> future = mExecutor.submit(callable);
-//
-//                String albumImageUrl = null;
-//                try {
-//                    albumImageUrl = future.get();
-//                } catch (InterruptedException | ExecutionException e) {
-//                    e.printStackTrace();
-//                }
-
                 String albumName = firstSongInfo.album;
                 String albumArtist = firstSongInfo.artist;
                 Album album = new Album(albumName, albumArtist, albumPath, MusicUtils.getNextCover());
@@ -151,6 +93,23 @@ public class SearchService extends Service {
             SearchService.this.isSearchActive = false;
             SearchService.this.stopSelf();
         }
-    }
 
+        private void iterateFiles(File[] files, HashMap<String, List<String>> music) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    this.iterateFiles(file.listFiles(), music);
+                } else {
+                    String name = file.getName();
+                    if (name.endsWith(".mp3")) {
+                        String dirPath = file.getParent();
+                        if (!music.containsKey(dirPath)) {
+                            music.put(dirPath, new LinkedList<String>());
+                        }
+                        List<String> songNames = music.get(dirPath);
+                        songNames.add(name);
+                    }
+                }
+            }
+        }
+    }
 }

@@ -14,8 +14,7 @@ import com.vlad.player.ui.song.SongFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class UIUtils {
-
+public final class UiUtils {
     public static void openSongPlayer(Song song, List<Song> songs, FragmentActivity activity) {
         SongFragment songFragment = (SongFragment) activity.getSupportFragmentManager()
                 .findFragmentByTag(Constants.SONG_FRAGMENT_TAG);

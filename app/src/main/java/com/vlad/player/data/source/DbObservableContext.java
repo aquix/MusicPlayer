@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.vlad.player.data.Album;
 import com.vlad.player.data.Song;
-import com.vlad.player.data.source.local.DbContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +42,6 @@ public class DbObservableContext implements IDbContext {
     private DbObservableContext(@NonNull Context context) {
         this.db = checkNotNull(DbContext.getInstance(context));
     }
-
 
     public void addContentObserver(AlbumsRepositoryObserver observer) {
         if (!this.observers.contains(observer)) {

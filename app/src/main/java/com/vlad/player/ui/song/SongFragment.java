@@ -22,16 +22,13 @@ import com.vlad.player.R;
 import com.vlad.player.data.Song;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
-import com.vlad.player.utils.MathUtils;
-import com.vlad.player.utils.UIUtils;
+import com.vlad.player.utils.UiUtils;
 
 import java.util.ArrayList;
 
 public class SongFragment extends Fragment implements PlayerService.PlayerCallback {
-
     private ViewPager songPager;
     private ImageView playButton;
-
 
     private PlayerService playerService;
     private boolean isServiceBound = false;
@@ -42,7 +39,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
 
     private Toolbar toolbar;
 
-    public SongFragment() {}
+    public SongFragment() { }
 
     public static SongFragment newInstance(int curSong, ArrayList<Song> songs) {
         SongFragment fragment = new SongFragment();
@@ -66,7 +63,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.song_fragment, container, false);
-        this.toolbar = UIUtils.setUpToolbar(false, null, (AppCompatActivity) this.getActivity());
+        this.toolbar = UiUtils.setUpToolbar(false, null, (AppCompatActivity) this.getActivity());
 
         this.songPager = (ViewPager) view.findViewById(R.id.song_pager);
         PagerAdapter pagerAdapter = new SongPagerAdapter(this.songs, this.getFragmentManager());
@@ -152,7 +149,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             }
             this.isPlaying = !this.isPlaying;
         } else {
-            this.songIndex = MathUtils.getPositiveModule(this.songIndex + offset, this.songs.size());
+            this.songIndex = (this.songIndex + this.songs.size() + this.songs.size() + offset) % this.songs.size();
             if(this.isPlaying) {
                 this.playerService.play(this.songIndex, this.songs);
             } else {
@@ -211,7 +208,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     public void onStart() {
         super.onStart();
         Intent intent = new Intent(this.getActivity(), PlayerService.class);
-        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
+        this.getActivity().bindService(intent, this.serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -219,18 +216,18 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         super.onStop();
         if (this.isServiceBound) {
             this.playerService.removePlayerListener(this);
-            this.getActivity().unbindService(this.mConnection);
+            this.getActivity().unbindService(this.serviceConnection);
             this.isServiceBound = false;
         }
     }
 
     @Override
     public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
-        Song curSong = this.songs.get(this.songIndex);
+        Song currentSong = this.songs.get(this.songIndex);
         this.isPlaying = isPlaying;
 
-        if (!curSong.equals(song)) {
-            if (isPlaying ) {
+        if (!currentSong.equals(song)) {
+            if (isPlaying) {
                 this.playSong();
             }
         }
@@ -245,8 +242,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         this.setSongData();
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-
+    private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {

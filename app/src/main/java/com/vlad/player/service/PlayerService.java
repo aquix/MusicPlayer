@@ -10,12 +10,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import com.vlad.player.R;
 import com.vlad.player.data.Song;
 import com.vlad.player.ui.songs.SongsActivity;
 import com.vlad.player.utils.Constants;
-import com.vlad.player.utils.MathUtils;
 import com.vlad.player.utils.MusicUtils;
 
 import java.io.IOException;
@@ -32,36 +32,25 @@ public class PlayerService extends Service implements
         void onStateChanged(boolean isPlaying, Song song);
     }
 
-//    private static final int UPDATE_DELAY = 200;
-    private static final int NOTIFICATION_ID = 100;
-    private static final int INDEX_NOT_INIT = -1;
-
-    private final IBinder binder = new LocalBinder();
-    private LinkedList<PlayerCallback> callbacks = new LinkedList<>();
-    private MediaPlayer mediaPlayer;
-
-    private int currentSongIndex = INDEX_NOT_INIT;
-    private ArrayList<Song> songs;
-    private String albumId;
-
-    private boolean wasPrepared = false;
-
-
     public class LocalBinder extends Binder {
         public PlayerService getService() {
             return PlayerService.this;
         }
     }
 
+    private static final int NOTIFICATION_ID = 100;
+
+    private final IBinder binder = new LocalBinder();
+    private LinkedList<PlayerCallback> callbacks = new LinkedList<>();
+    private MediaPlayer mediaPlayer;
+
+    private int currentSongIndex = -1;
+    private ArrayList<Song> songs;
+    private String albumId;
+    private boolean wasPrepared = false;
+
     public PlayerService() {
         this.initializePlayer();
-    }
-
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return this.binder;
     }
 
     @Override
@@ -79,6 +68,7 @@ public class PlayerService extends Service implements
     }
 
     private void notifyGetState(PlayerCallback callback) {
+        Log.d("dsfjsadf", "get state");
         float seekPos = 0;
         boolean isPlaying = false;
         if (this.mediaPlayer != null) {
@@ -88,12 +78,12 @@ public class PlayerService extends Service implements
             isPlaying = this.mediaPlayer.isPlaying();
         }
 
+        Song currentSong = null;
         if (isPlaying) {
-            Song song = this.songs.get(this.currentSongIndex);
-            callback.onGetState(seekPos, true, song);
-        } else {
-            callback.onGetState(seekPos, false, null);
+            currentSong = this.songs.get(this.currentSongIndex);
         }
+
+        callback.onGetState(seekPos, isPlaying, currentSong);
     }
 
     private void notifyNextSong(Song song) {
@@ -101,28 +91,20 @@ public class PlayerService extends Service implements
         if (this.mediaPlayer != null) {
             isPlaying = this.mediaPlayer.isPlaying();
         }
-        for(PlayerCallback callback: this.callbacks) {
+
+        for (PlayerCallback callback: this.callbacks) {
             callback.onStateChanged(isPlaying, song);
         }
     }
-
 
     private void initializePlayer() {
         this.mediaPlayer = new MediaPlayer();
         this.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         this.mediaPlayer.setOnPreparedListener(this);
         this.mediaPlayer.setOnCompletionListener(this);
-
-//        mTimer = new CountDownTimer(Long.MAX_VALUE, UPDATE_DELAY) {
-//            public void onTick(long millisUntilFinished) {
-//                notifyCallbacks();
-//            }
-//
-//            public void onFinish() {}
-//        }.start();
     }
 
-    public void setCurDataSource() {
+    public void setCurrentDataSource() {
         String songPath = this.songs.get(this.currentSongIndex).getPath();
         try {
             this.mediaPlayer.reset();
@@ -144,7 +126,7 @@ public class PlayerService extends Service implements
             this.songs = songs;
             this.albumId = albumId;
 
-            this.setCurDataSource();
+            this.setCurrentDataSource();
             this.mediaPlayer.prepareAsync();
         }
     }
@@ -164,6 +146,7 @@ public class PlayerService extends Service implements
                 e.printStackTrace();
             }
         }
+
         this.stopForeground(true);
     }
 
@@ -187,12 +170,18 @@ public class PlayerService extends Service implements
         if(this.songs == null) {
             return;
         }
-        this.currentSongIndex = MathUtils.getPositiveModule(this.currentSongIndex + 1, this.songs.size());
-        this.setCurDataSource();
+        this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.size();
+        this.setCurrentDataSource();
         this.mediaPlayer.prepareAsync();
 
         Song song = this.songs.get(this.currentSongIndex);
         this.notifyNextSong(song);
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return this.binder;
     }
 
     @Override
@@ -208,5 +197,4 @@ public class PlayerService extends Service implements
         super.onDestroy();
         this.release();
     }
-
 }

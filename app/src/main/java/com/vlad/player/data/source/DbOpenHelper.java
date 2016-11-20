@@ -1,10 +1,10 @@
-package com.vlad.player.data.source.local;
+package com.vlad.player.data.source;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.vlad.player.data.source.local.DbConstants.AlbumEntity;
-import com.vlad.player.data.source.local.DbConstants.SongEntity;
+import com.vlad.player.data.source.DbConstants.AlbumEntity;
+import com.vlad.player.data.source.DbConstants.SongEntity;
 
 
 class DbOpenHelper extends SQLiteOpenHelper {
