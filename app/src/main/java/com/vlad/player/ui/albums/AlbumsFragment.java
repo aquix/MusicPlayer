@@ -28,7 +28,7 @@ import com.vlad.player.data.Song;
 import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.ui.view.HeaderGridView;
-import com.vlad.player.utils.MusicUtils;
+import com.vlad.player.utils.RecentSongsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +118,7 @@ public class AlbumsFragment extends Fragment implements
     }
 
     private void addRecentSongsHeader(HeaderGridView albumsGrid) {
-        List<Song> recentSongs = MusicUtils.getRecent();
+        List<Song> recentSongs = RecentSongsService.getRecent();
         LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
         RecyclerView songsList = (RecyclerView) this.header.findViewById(R.id.recent_songs);
@@ -163,7 +163,7 @@ public class AlbumsFragment extends Fragment implements
         this.getActivity().startService(intent);
         this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
 
-        if (!MusicUtils.getRecent().isEmpty()) {
+        if (!RecentSongsService.getRecent().isEmpty()) {
             this.header.setVisibility(View.VISIBLE);
             this.albumsRecentAdapter.notifyDataSetChanged();
         }

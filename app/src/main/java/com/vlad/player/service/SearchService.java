@@ -77,13 +77,13 @@ public class SearchService extends Service {
 
                 String albumName = firstSongInfo.album;
                 String albumArtist = firstSongInfo.artist;
-                Album album = new Album(albumName, albumArtist, albumPath, MusicUtils.getNextCover());
+                Album album = new Album(albumName, albumArtist, albumPath, MusicUtils.getCover(songsInfo.get(0)));
                 ArrayList<Song> songs = new ArrayList<>();
                 for(int i = 0; i < songsInfo.size(); ++i) {
                     MusicUtils.SongInfo songInfo = songsInfo.get(i);
                     String songName = songInfo.title;
                     String songPath = albumPath + '/' + songsFileName.get(i);
-                    String albumCover = MusicUtils.getNextCover();
+                    String albumCover = MusicUtils.getCover(songInfo);
                     Song song = new Song(songName, songPath, albumCover, songInfo.duration, album.getId());
                     songs.add(song);
                 }

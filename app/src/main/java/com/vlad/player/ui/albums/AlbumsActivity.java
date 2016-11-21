@@ -71,7 +71,11 @@ public class AlbumsActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         if(this.isServiceBound) {
-            this.unbindService(this.mConnection);
+            try {
+                this.unbindService(this.mConnection);
+            } catch (IllegalArgumentException err) {
+                // FIXME something should be done
+            }
         }
     }
 

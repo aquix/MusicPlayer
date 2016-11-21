@@ -1,8 +1,5 @@
 package com.vlad.player.utils;
 
-
-import android.net.Uri;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
@@ -15,11 +12,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public final class NetworkUtils {
-
-    private static final String LAST_FM_API_KEY = "";
-
-    public static JSONObject loadURL(String path) {
+public class NetworkService {
+    public static JSONObject get(String path) {
         InputStream is = null;
         try {
             URL url = new URL(path);
@@ -59,31 +53,5 @@ public final class NetworkUtils {
             }
         }
         return null;
-    }
-
-    private static Uri.Builder getUrlBase(MusicUtils.SongInfo songInfo) {
-        return new Uri.Builder()
-                .scheme("http")
-                .authority("ws.audioscrobbler.com")
-                .path("2.0")
-                .appendQueryParameter("format", "json")
-                .appendQueryParameter("artist", songInfo.artist)
-                .appendQueryParameter("album", songInfo.album)
-                .appendQueryParameter("album", songInfo.album)
-                .appendQueryParameter("api_key", LAST_FM_API_KEY);
-    }
-
-    public static String genSongInfoUrl(MusicUtils.SongInfo songInfo) {
-        Uri uri = getUrlBase(songInfo)
-            .appendQueryParameter("method", "track.getinfo")
-            .build();
-        return uri.toString();
-    }
-
-    public static String genAlbomInfoUrl(MusicUtils.SongInfo songInfo) {
-        Uri uri = getUrlBase(songInfo)
-                .appendQueryParameter("method", "albom.getinfo")
-                .build();
-        return uri.toString();
     }
 }

@@ -16,7 +16,7 @@ import com.vlad.player.R;
 import com.vlad.player.data.Song;
 import com.vlad.player.ui.songs.SongsActivity;
 import com.vlad.player.utils.Constants;
-import com.vlad.player.utils.MusicUtils;
+import com.vlad.player.utils.RecentSongsService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ public class PlayerService extends Service implements
     public void onPrepared(MediaPlayer mediaPlayer) {
         this.mediaPlayer.start();
         this.wasPrepared = true;
-        MusicUtils.addToRecent(this.songs.get(this.currentSongIndex));
+        RecentSongsService.addToRecent(this.songs.get(this.currentSongIndex));
         this.startForeground(NOTIFICATION_ID, this.getNotification());
         for (PlayerCallback callback : callbacks) {
             this.notifyNewState(callback);
