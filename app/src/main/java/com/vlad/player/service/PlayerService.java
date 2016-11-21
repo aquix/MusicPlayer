@@ -28,8 +28,11 @@ public class PlayerService extends Service implements
         MediaPlayer.OnPreparedListener {
 
     public interface PlayerCallback {
-        void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song);
-        void onStateChanged(boolean isPlaying, Song song);
+        void onNewState(float seekPosition, boolean isPlaying, @Nullable Song song);
+
+        void onNextSong(boolean isPlaying, Song song);
+
+        void onSeekPositionChange(int seekPosition);
     }
 
     public class LocalBinder extends Binder {
@@ -49,6 +52,8 @@ public class PlayerService extends Service implements
     private String albumId;
     private boolean wasPrepared = false;
 
+    private Thread positionNotifierThread;
+
     public PlayerService() {
         this.initializePlayer();
     }
@@ -60,16 +65,16 @@ public class PlayerService extends Service implements
 
     public void addPlayerListener(PlayerCallback callback) {
         this.callbacks.add(callback);
-        this.notifyGetState(callback);
+        this.notifyNewState(callback);
     }
 
     public void removePlayerListener(PlayerCallback callback) {
         this.callbacks.remove(callback);
     }
 
-    private void notifyGetState(PlayerCallback callback) {
+    private void notifyNewState(PlayerCallback callback) {
         Log.d("dsfjsadf", "get state");
-        float seekPos = 0;
+        float seekPos = 1;
         boolean isPlaying = false;
         if (this.mediaPlayer != null) {
             if (this.wasPrepared) {
@@ -83,7 +88,7 @@ public class PlayerService extends Service implements
             currentSong = this.songs.get(this.currentSongIndex);
         }
 
-        callback.onGetState(seekPos, isPlaying, currentSong);
+        callback.onNewState(seekPos, isPlaying, currentSong);
     }
 
     private void notifyNextSong(Song song) {
@@ -92,8 +97,8 @@ public class PlayerService extends Service implements
             isPlaying = this.mediaPlayer.isPlaying();
         }
 
-        for (PlayerCallback callback: this.callbacks) {
-            callback.onStateChanged(isPlaying, song);
+        for (PlayerCallback callback : this.callbacks) {
+            callback.onNextSong(isPlaying, song);
         }
     }
 
@@ -102,6 +107,23 @@ public class PlayerService extends Service implements
         this.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         this.mediaPlayer.setOnPreparedListener(this);
         this.mediaPlayer.setOnCompletionListener(this);
+
+        this.positionNotifierThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                    for (PlayerCallback callback : PlayerService.this.callbacks) {
+                        callback.onSeekPositionChange(
+                                PlayerService.this.mediaPlayer.getCurrentPosition());
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            }
+        });
     }
 
     public void setCurrentDataSource() {
@@ -135,6 +157,13 @@ public class PlayerService extends Service implements
         if (this.mediaPlayer != null) {
             this.mediaPlayer.pause();
         }
+
+        Log.d("thread", "interrupted");
+        this.positionNotifierThread.interrupt();
+    }
+
+    public void seekTo(int songPosition) {
+        this.mediaPlayer.seekTo(songPosition);
     }
 
     public void release() {
@@ -167,7 +196,8 @@ public class PlayerService extends Service implements
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        if(this.songs == null) {
+        this.positionNotifierThread.interrupt();
+        if (this.songs == null) {
             return;
         }
         this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.size();
@@ -190,6 +220,13 @@ public class PlayerService extends Service implements
         this.wasPrepared = true;
         MusicUtils.addToRecent(this.songs.get(this.currentSongIndex));
         this.startForeground(NOTIFICATION_ID, this.getNotification());
+        for (PlayerCallback callback : callbacks) {
+            this.notifyNewState(callback);
+        }
+        if (!this.positionNotifierThread.isAlive()) {
+            this.positionNotifierThread.start();
+        }
+        Log.d("thread", "started");
     }
 
     @Override

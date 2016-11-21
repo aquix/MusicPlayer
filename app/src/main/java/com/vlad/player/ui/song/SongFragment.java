@@ -12,11 +12,13 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 
 import com.vlad.player.R;
 import com.vlad.player.data.Song;
@@ -25,10 +27,12 @@ import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.UiUtils;
 
 import java.util.ArrayList;
+import java.util.logging.Handler;
 
 public class SongFragment extends Fragment implements PlayerService.PlayerCallback {
     private ViewPager songPager;
     private ImageView playButton;
+    private SeekBar seekBar;
 
     private PlayerService playerService;
     private boolean isServiceBound = false;
@@ -38,6 +42,8 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     private boolean isPlaying;
 
     private Toolbar toolbar;
+
+    private Handler handler;
 
     public SongFragment() { }
 
@@ -76,7 +82,10 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         View nextButton = view.findViewById(R.id.next_song_button);
         this.playButton = (ImageView) view.findViewById(R.id.player_control);
 
-        this.setSongData();
+        this.seekBar = (SeekBar) view.findViewById(R.id.song_seek_bar);
+
+
+        this.updateSongDate();
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +104,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_UP:
-                        SongFragment.this.playAnotherSong(0);
+                        SongFragment.this.togglePlayPause();
                         break;
                 }
                 return true;
@@ -122,7 +131,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         outState.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, this.songs.get(this.songIndex));
     }
 
-    private void setSongData() {
+    private void updateSongDate() {
         if (this.songPager.getCurrentItem() != this.songIndex) {
             this.songPager.setCurrentItem(this.songIndex, true);
         }
@@ -131,38 +140,35 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             this.toolbar.setTitle(songName);
         }
 
-        int playImageResource;
-        if(this.isPlaying) {
-            playImageResource = android.R.drawable.ic_media_pause;
-        } else {
-            playImageResource = android.R.drawable.ic_media_play;
-        }
-        this.playButton.setImageResource(playImageResource);
+        this.updatePlayPauseButton();
+        this.seekBar.setMax(this.songs.get(this.songIndex).getDuration());
+        this.seekBar.setProgress(0);
     }
 
     public void playAnotherSong(int offset) {
-        if (offset == 0) {
-            if(this.isPlaying) {
-                this.playerService.pause();
-            } else {
-                this.playerService.play(this.songIndex, this.songs);
-            }
-            this.isPlaying = !this.isPlaying;
+        this.songIndex = (this.songIndex + this.songs.size() + this.songs.size() + offset) % this.songs.size();
+        if(this.isPlaying) {
+            this.playerService.play(this.songIndex, this.songs);
         } else {
-            this.songIndex = (this.songIndex + this.songs.size() + this.songs.size() + offset) % this.songs.size();
-            if(this.isPlaying) {
-                this.playerService.play(this.songIndex, this.songs);
-            } else {
-                this.playerService.pause();
-            }
+            this.playerService.pause();
         }
 
-        this.setSongData();
+        this.updateSongDate();
+    }
+
+    public void togglePlayPause() {
+        if(this.isPlaying) {
+            this.playerService.pause();
+        } else {
+            this.playerService.play(this.songIndex, this.songs);
+        }
+        this.isPlaying = !this.isPlaying;
+        this.updatePlayPauseButton();
     }
 
     private void playSong() {
         this.playerService.play(this.songIndex, this.songs);
-        this.setSongData();
+        this.updateSongDate();
     }
 
     public void addSwipeGestureControl(View panel) {
@@ -222,7 +228,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     }
 
     @Override
-    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+    public void onNewState(float seekPosition, boolean isPlaying, @Nullable Song song) {
         Song currentSong = this.songs.get(this.songIndex);
         this.isPlaying = isPlaying;
 
@@ -232,14 +238,30 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             }
         }
 
-        this.setSongData();
+        this.seekBar.setMax(this.songs.get(this.songIndex).getDuration());
+        this.updateSongDate();
     }
 
     @Override
-    public void onStateChanged(boolean isPlaying, Song song) {
+    public void onNextSong(boolean isPlaying, Song song) {
         this.songIndex = this.songs.indexOf(song);
         this.isPlaying = isPlaying;
-        this.setSongData();
+        this.updateSongDate();
+    }
+
+    @Override
+    public void onSeekPositionChange(int seekPosition) {
+        this.seekBar.setProgress(seekPosition);
+    }
+
+    private void updatePlayPauseButton() {
+        int playImageResource;
+        if(this.isPlaying) {
+            playImageResource = android.R.drawable.ic_media_pause;
+        } else {
+            playImageResource = android.R.drawable.ic_media_play;
+        }
+        this.playButton.setImageResource(playImageResource);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -249,6 +271,26 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
             SongFragment.this.playerService = binder.getService();
             SongFragment.this.playerService.addPlayerListener(SongFragment.this);
+
+
+            SongFragment.this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) { }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d("pr", "changed");
+                    if(SongFragment.this.playerService != null){
+                        SongFragment.this.playerService.seekTo(seekBar.getProgress());
+                    }
+                }
+            });
+
             SongFragment.this.isServiceBound = true;
         }
 

@@ -38,7 +38,7 @@ public class AlbumsFragment extends Fragment implements
         PlayerService.PlayerCallback {
 
     static {
-        System.loadLibrary("native-lib");
+        // System.loadLibrary("native-lib");
     }
 
     private static final int PORTRAIT_COLUMNS_COUNT = 2;
@@ -90,7 +90,9 @@ public class AlbumsFragment extends Fragment implements
 
     }
 
-    public native long sum(ArrayList<Integer> list);
+    public long sum(ArrayList<Integer> list) {
+        return 0;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -211,14 +213,17 @@ public class AlbumsFragment extends Fragment implements
     }
 
     @Override
-    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+    public void onNewState(float seekPosition, boolean isPlaying, @Nullable Song song) {
         this.setActiveAlbum(isPlaying, song);
     }
 
     @Override
-    public void onStateChanged(boolean isPlaying, Song song) {
+    public void onNextSong(boolean isPlaying, Song song) {
         this.setActiveAlbum(isPlaying, song);
     }
+
+    @Override
+    public void onSeekPositionChange(int seekPosition) { }
 
     private ServiceConnection mConnection = new ServiceConnection() {
 

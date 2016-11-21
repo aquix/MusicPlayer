@@ -113,8 +113,8 @@ public class AlbumsActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder service) {
             SearchService.LocalBinder binder = (SearchService.LocalBinder) service;
             AlbumsActivity.this.searchService = binder.getService();
-            AlbumsActivity.this.isServiceBound = true;
             AlbumsActivity.this.searchService.startMusicSearch();
+            AlbumsActivity.this.isServiceBound = true;
         }
 
         public void onServiceDisconnected(ComponentName className) {

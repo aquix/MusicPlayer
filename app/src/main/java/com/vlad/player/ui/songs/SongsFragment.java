@@ -189,14 +189,17 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     }
 
     @Override
-    public void onGetState(float seekPosition, boolean isPlaying, @Nullable Song song) {
+    public void onNewState(float seekPosition, boolean isPlaying, @Nullable Song song) {
         this.setPlayingSong(isPlaying, song);
     }
 
     @Override
-    public void onStateChanged(boolean isPlaying, Song song) {
+    public void onNextSong(boolean isPlaying, Song song) {
         this.setPlayingSong(isPlaying, song);
     }
+
+    @Override
+    public void onSeekPositionChange(int seekPosition) { }
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
