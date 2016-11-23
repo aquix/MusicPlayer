@@ -1,4 +1,4 @@
-package com.vlad.player.ui.albums;
+package com.vlad.player.ui.artists;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.ui.songs.SongsActivity;
 import com.vlad.player.utils.Constants;
 import com.squareup.picasso.Picasso;

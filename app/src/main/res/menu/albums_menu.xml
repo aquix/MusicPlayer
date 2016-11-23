@@ -8,4 +8,9 @@
         android:id="@+id/albums_search_menu"
         android:title="@string/search_music" />
 
+    <item
+        android:icon="@android:drawable/ic_menu_more"
+        android2:showAsAction="ifRoom"
+        android:id="@+id/albums_show_all"
+        android:title="@string/show_all" />
 </menu>

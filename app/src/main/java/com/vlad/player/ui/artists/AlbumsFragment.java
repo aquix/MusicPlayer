@@ -1,4 +1,4 @@
-package com.vlad.player.ui.albums;
+package com.vlad.player.ui.artists;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,9 +23,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.data.source.DbObservableContext;
+import com.vlad.player.data.viewmodels.SongFullInfo;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.ui.view.HeaderGridView;
 import com.vlad.player.utils.RecentSongsService;
@@ -56,7 +57,7 @@ public class AlbumsFragment extends Fragment implements
     private PlayerService playerService;
     private boolean isServiceBound = false;
 
-    private List<Album> albums;
+    private List<Artist> artists;
 
     public AlbumsFragment() {}
 
@@ -69,7 +70,11 @@ public class AlbumsFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         this.musicRepository = DbObservableContext.getInstance(this.getContext());
         this.musicRepository.addContentObserver(this);
-        ArrayList<Integer> durations = this.musicRepository.printAllSongs();
+        ArrayList<Integer> durations = new ArrayList<>();
+        ArrayList<SongFullInfo> allSongs = this.musicRepository.getAllSongs();
+        for (SongFullInfo song : allSongs) {
+            durations.add(song.Duration);
+        }
         this.checkJNI(durations);
         Log.d(TAG_LIFECYCLE, "onCreate");
     }
@@ -133,8 +138,8 @@ public class AlbumsFragment extends Fragment implements
     }
 
     private void loadAlbums() {
-        this.albums = this.musicRepository.getAlbums();
-        this.albumsListAdapter.replaceData(this.albums);
+        this.artists = this.musicRepository.getAllArtists();
+        this.albumsListAdapter.replaceData(this.artists);
     }
 
     private void setColumnsCount(HeaderGridView albumsGrid) {
@@ -147,7 +152,7 @@ public class AlbumsFragment extends Fragment implements
     }
 
     @Override
-    public void onAlbumsChanged() {
+    public void onArtistsChanged() {
         this.mainHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -196,30 +201,30 @@ public class AlbumsFragment extends Fragment implements
             case R.id.remove_from_list_item:
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 int position = info.position - 2;
-                Album album = this.albums.get(position);
-                this.albumsListAdapter.removeAlbum(album);
-                this.musicRepository.deleteAlbum(album);
+                Artist artist = this.artists.get(position);
+                this.albumsListAdapter.removeArtist(artist);
+                this.musicRepository.deleteArtist(artist);
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
-    private void setActiveAlbum(boolean isPlaying, Song song) {
+    private void setActiveArtist(boolean isPlaying, Song song) {
         if (isPlaying) {
-            this.albumsListAdapter.setPlayingAlbum(song.getAlbumId());
+            this.albumsListAdapter.setPlayingArtist(song.getArtistId());
         } else {
-            this.albumsListAdapter.setPlayingAlbum(null);
+            this.albumsListAdapter.setPlayingArtist(-1);
         }
     }
 
     @Override
     public void onNewState(float seekPosition, boolean isPlaying, @Nullable Song song) {
-        this.setActiveAlbum(isPlaying, song);
+        this.setActiveArtist(isPlaying, song);
     }
 
     @Override
     public void onNextSong(boolean isPlaying, Song song) {
-        this.setActiveAlbum(isPlaying, song);
+        this.setActiveArtist(isPlaying, song);
     }
 
     @Override

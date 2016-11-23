@@ -22,8 +22,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
@@ -33,7 +33,7 @@ import java.io.File;
 import java.util.List;
 
 public class SongsFragment extends Fragment implements PlayerService.PlayerCallback {
-    private Album album;
+    private Artist artist;
 
     private SongsListAdapter adapter;
     private DbObservableContext musicRepository;
@@ -44,10 +44,10 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     private PlayerService playerService;
     private boolean isServiceBound = false;
 
-    public static SongsFragment newInstance(Album album, Song openedSong) {
+    public static SongsFragment newInstance(Artist artist, Song openedSong) {
         SongsFragment fragment = new SongsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, album);
+        args.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, artist);
         args.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, openedSong);
         fragment.setArguments(args);
         return fragment;
@@ -58,17 +58,17 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         super.onCreate(savedInstanceState);
         Song openedSong = null;
         if (this.getArguments() != null) {
-            this.album = this.getArguments().getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
+            this.artist = this.getArguments().getParcelable(Constants.ALBUM_BUNDLE.ALBUM);
             openedSong = this.getArguments().getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
 
         this.musicRepository = DbObservableContext.getInstance(this.getContext());
-        if(this.album == null && openedSong != null) {
-            this.album = this.musicRepository.getAlbum(openedSong.getAlbumId());
+        if(this.artist == null && openedSong != null) {
+            this.artist = this.musicRepository.getArtist(openedSong.getArtistId());
         }
 
         if(openedSong != null) {
-            List<Song> songs = this.musicRepository.getSongs(this.album.getId(), this.isSortBySize);
+            List<Song> songs = this.musicRepository.getSongsForArtist(this.artist.getId(), this.isSortBySize);
             UiUtils.openSongPlayer(openedSong, songs, this.getActivity());
         }
     }
@@ -78,10 +78,10 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
                              Bundle savedInstanceState) {
         this.setHasOptionsMenu(true);
         View view  = inflater.inflate(R.layout.songs_fragment, container, false);
-        UiUtils.setUpToolbar(true, this.album.getName() ,(AppCompatActivity) this.getActivity());
+        UiUtils.setUpToolbar(true, this.artist.getName() ,(AppCompatActivity) this.getActivity());
 
         ListView albumsList = (ListView) view.findViewById(R.id.songs_list);
-        this.adapter = new SongsListAdapter(this.album, this.getActivity());
+        this.adapter = new SongsListAdapter(this.artist, this.getActivity());
         albumsList.setAdapter(this.adapter);
         this.loadAlbums();
 
@@ -93,11 +93,11 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, this.album);
+        outState.putParcelable(Constants.ALBUM_BUNDLE.ALBUM, this.artist);
     }
 
     private void loadAlbums() {
-        this.songs = this.musicRepository.getSongs(this.album.getId(), this.isSortBySize);
+        this.songs = this.musicRepository.getSongsForArtist(this.artist.getId(), this.isSortBySize);
         this.adapter.replaceData(this.songs);
     }
 

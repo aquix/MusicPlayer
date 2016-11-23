@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.utils.UiUtils;
 import com.squareup.picasso.Picasso;
 
@@ -25,13 +25,13 @@ class SongsListAdapter extends BaseAdapter {
     private FragmentActivity activity;
     private LayoutInflater layoutInflater;
     private ArrayList<Song> songs;
-    private Album album;
+    private Artist artist;
     private int playingSongIndex;
 
-    SongsListAdapter(Album album, Activity activity) {
+    SongsListAdapter(Artist artist, Activity activity) {
         this.activity = (FragmentActivity) activity;
         this.layoutInflater = LayoutInflater.from(activity);
-        this.album = album;
+        this.artist = artist;
         this.songs = new ArrayList<>();
         this.playingSongIndex = -1;
     }
@@ -116,7 +116,7 @@ class SongsListAdapter extends BaseAdapter {
 
     private void fillHolder(ViewHolder holder, Song song, int songIndex) {
         holder.songName.setText(song.getName());
-        holder.songArtist.setText(this.album.getArtist());
+        holder.songArtist.setText(this.artist.getName());
         holder.songDuration.setText(this.formatDuration(song.getDuration()));
         if(songIndex == this.playingSongIndex) {
             Drawable drawable = ContextCompat.getDrawable(this.activity, R.drawable.playing_indicator);

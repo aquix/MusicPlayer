@@ -1,4 +1,4 @@
-package com.vlad.player.ui.albums;
+package com.vlad.player.ui.artists;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Album;
+import com.vlad.player.data.models.Artist;
 import com.vlad.player.ui.songs.SongsActivity;
 import com.vlad.player.utils.Constants;
 import com.squareup.picasso.Picasso;
@@ -23,30 +23,30 @@ import java.util.List;
 class AlbumsListAdapter extends BaseAdapter {
 
     private LayoutInflater layoutInflater;
-    private ArrayList<Album> albums;
+    private ArrayList<Artist> artists;
     private Activity activity;
 
-    private String playingAlbumId;
+    private long playingArtistId;
 
     AlbumsListAdapter(Activity activity) {
         this.layoutInflater = LayoutInflater.from(activity);
-        this.albums = new ArrayList<>();
+        this.artists = new ArrayList<>();
         this.activity = activity;
     }
 
-    void replaceData(List<Album> albums) {
-        this.albums = new ArrayList<>(albums);
+    void replaceData(List<Artist> artists) {
+        this.artists = new ArrayList<>(artists);
         this.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return this.albums.size();
+        return this.artists.size();
     }
 
     @Override
-    public Album getItem(int position) {
-        return this.albums.get(position);
+    public Artist getItem(int position) {
+        return this.artists.get(position);
     }
 
     @Override
@@ -55,36 +55,34 @@ class AlbumsListAdapter extends BaseAdapter {
     }
 
     private static class ViewHolder {
-        TextView albumName;
-        TextView albumArtist;
+        TextView artistName;
         ImageView playingIndicator;
-        ImageView albumCover;
+        ImageView image;
     }
 
-    void setPlayingAlbum(String albumId) {
-        this.playingAlbumId = albumId;
+    public void setPlayingArtist(long artistId) {
+        this.playingArtistId = artistId;
         this.notifyDataSetChanged();
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final Album album = this.getItem(position);
+        final Artist artist = this.getItem(position);
         ViewHolder holder;
 
         if(view == null || view.getTag() == null) {
             view = this.layoutInflater.inflate(R.layout.albums_list_item, parent, false);
             holder = new ViewHolder();
 
-            holder.albumName = (TextView) view.findViewById(R.id.album_name);
-            holder.albumArtist = (TextView) view.findViewById(R.id.album_artist);
+            holder.artistName = (TextView) view.findViewById(R.id.album_artist);
             holder.playingIndicator = (ImageView) view.findViewById(R.id.album_playing_indicator);
-            holder.albumCover = (ImageView) view.findViewById(R.id.album_cover);
+            holder.image = (ImageView) view.findViewById(R.id.album_cover);
 
-            this.fillHolder(holder, album);
+            this.fillHolder(holder, artist);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
-            this.fillHolder(holder, album);
+            this.fillHolder(holder, artist);
         }
 
         view.setClickable(true);
@@ -92,7 +90,7 @@ class AlbumsListAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlbumsListAdapter.this.openAlbum(album);
+                AlbumsListAdapter.this.openArtist(artist);
             }
         });
         view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -107,28 +105,27 @@ class AlbumsListAdapter extends BaseAdapter {
         return view;
     }
 
-    void removeAlbum(Album album) {
-        this.albums.remove(album);
+    void removeArtist(Artist artist) {
+        this.artists.remove(artist);
         this.notifyDataSetChanged();
     }
 
-    private void openAlbum(Album album) {
+    private void openArtist(Artist artist) {
         Intent intent = new Intent(this.activity, SongsActivity.class);
-        intent.putExtra(Constants.ALBUM_BUNDLE.ALBUM, album);
+        intent.putExtra(Constants.ALBUM_BUNDLE.ALBUM, artist);
         this.activity.startActivity(intent);
     }
 
-    private void fillHolder(ViewHolder holder, Album album) {
-        holder.albumName.setText(album.getName());
-        holder.albumArtist.setText(album.getArtist());
-        if(album.getId().equals(this.playingAlbumId)) {
+    private void fillHolder(ViewHolder holder, Artist artist) {
+        holder.artistName.setText(artist.getName());
+        if(artist.getId() == this.playingArtistId) {
             Drawable drawable = ContextCompat.getDrawable(this.activity, R.drawable.playing_indicator);
             holder.playingIndicator.setImageDrawable(drawable);
         } else {
             holder.playingIndicator.setImageResource(android.R.color.transparent);
         }
-        String coverUrl = album.getImagePath();
-        Picasso.with(this.activity).load(coverUrl).into(holder.albumCover);
+        String coverUrl = artist.getImagePath();
+        Picasso.with(this.activity).load(coverUrl).into(holder.image);
     }
 
 

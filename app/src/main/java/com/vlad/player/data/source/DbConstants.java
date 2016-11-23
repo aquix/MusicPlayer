@@ -4,24 +4,21 @@ package com.vlad.player.data.source;
 import android.provider.BaseColumns;
 
 public final class DbConstants {
-
     private DbConstants() {}
 
-    static abstract class AlbumEntity implements BaseColumns {
-        static final String TABLE_NAME = "albums";
+    static abstract class ArtistEntity implements BaseColumns {
+        static final String TABLE_NAME = "artists";
 
-        static final String ID = "id";
+        static final String ID = "_id";
         static final String NAME = "name";
-        static final String ARTIST = "artist";
-        static final String PATH = "path";
-        static final String ALBUM_ART_PATH = "album_art_path";
+        static final String IMAGE_PATH = "image_path";
     }
 
     static abstract class SongEntity implements BaseColumns {
         static final String TABLE_NAME = "songs";
 
-        static final String ID = "id";
-        static final String ALBUM_ID = "album_id";
+        static final String ID = "_id";
+        static final String ARTIST_ID = "artist_id";
         static final String NAME = "name";
         static final String PATH = "path";
         static final String DURATION = "duration";

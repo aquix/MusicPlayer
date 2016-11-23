@@ -7,10 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
-import com.vlad.player.data.source.DbConstants.AlbumEntity;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
+import com.vlad.player.data.source.DbConstants.ArtistEntity;
 import com.vlad.player.data.source.DbConstants.SongEntity;
+import com.vlad.player.data.viewmodels.SongFullInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,23 +34,8 @@ public class DbContext implements IDbContext {
         return instance;
     }
 
-    private boolean isEntityExist(SQLiteDatabase db, String tableName, String fieldName, String entryId) {
-        Cursor c = null;
-        try {
-            String query = "select count(*) from " + tableName + " where " + fieldName + " = ?";
-            c = db.rawQuery(query, new String[]{entryId});
-            return c.moveToFirst() && c.getInt(0) != 0;
-        }
-        finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
-    @NonNull
     @Override
-    public List<Song> getSongs(@NonNull String albumId, boolean sortByName) {
+    public List<Song> getSongsForArtist(long artistId, boolean sortByName) {
         SQLiteDatabase db = this.dbOpenHelper.getReadableDatabase();
         List<Song> songs = new ArrayList<>();
         String[] columnNames =  {
@@ -60,8 +46,8 @@ public class DbContext implements IDbContext {
                 SongEntity.IMAGE_PATH,
         };
 
-        String selection = SongEntity.ALBUM_ID + " LIKE ?";
-        String[] selectionArgs = { albumId };
+        String selection = SongEntity.ARTIST_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(artistId) };
 
         String sortBy;
         if (sortByName) {
@@ -75,8 +61,8 @@ public class DbContext implements IDbContext {
 
         if (c != null && c.getCount() > 0) {
             while (c.moveToNext()) {
-                String songId = c
-                        .getString(c.getColumnIndexOrThrow(SongEntity.ID));
+                long songId = c
+                        .getLong(c.getColumnIndexOrThrow(SongEntity.ID));
                 String songName = c
                         .getString(c.getColumnIndexOrThrow(SongEntity.NAME));
                 String songPath =
@@ -85,7 +71,7 @@ public class DbContext implements IDbContext {
                         c.getInt(c.getColumnIndexOrThrow(SongEntity.DURATION));
                 String songImagePath =
                         c.getString(c.getColumnIndexOrThrow(SongEntity.IMAGE_PATH));
-                Song song = new Song(songId, songName, songPath, songImagePath, songDuration, albumId);
+                Song song = new Song(songId, songName, songPath, songImagePath, songDuration, artistId);
                 songs.add(song);
             }
         }
@@ -99,34 +85,28 @@ public class DbContext implements IDbContext {
 
     @NonNull
     @Override
-    public List<Album> getAlbums() {
+    public List<Artist> getAllArtists() {
         SQLiteDatabase db = this.dbOpenHelper.getReadableDatabase();
-        List<Album> albums = new ArrayList<>();
+        List<Artist> artists = new ArrayList<>();
         String[] columnNames =  {
-                AlbumEntity.ID,
-                AlbumEntity.NAME,
-                AlbumEntity.ARTIST,
-                AlbumEntity.PATH,
-                AlbumEntity.ALBUM_ART_PATH,
+                ArtistEntity.ID,
+                ArtistEntity.NAME,
+                ArtistEntity.IMAGE_PATH,
         };
 
         Cursor c = db.query(
-                AlbumEntity.TABLE_NAME, columnNames, null, null, null, null, null);
+                ArtistEntity.TABLE_NAME, columnNames, null, null, null, null, null);
 
         if (c != null && c.getCount() > 0) {
             while (c.moveToNext()) {
-                String albumId = c
-                        .getString(c.getColumnIndexOrThrow(AlbumEntity.ID));
+                long albumId = c
+                        .getLong(c.getColumnIndexOrThrow(ArtistEntity.ID));
                 String albumName =
-                        c.getString(c.getColumnIndexOrThrow(AlbumEntity.NAME));
-                String albumArtist =
-                        c.getString(c.getColumnIndexOrThrow(AlbumEntity.ARTIST));
-                String albumPath =
-                        c.getString(c.getColumnIndexOrThrow(AlbumEntity.PATH));
+                        c.getString(c.getColumnIndexOrThrow(ArtistEntity.NAME));
                 String albumImagePath =
-                        c.getString(c.getColumnIndexOrThrow(AlbumEntity.ALBUM_ART_PATH));
-                Album album = new Album(albumId, albumName, albumArtist, albumPath, albumImagePath);
-                albums.add(album);
+                        c.getString(c.getColumnIndexOrThrow(ArtistEntity.IMAGE_PATH));
+                Artist artist = new Artist(albumId, albumName, albumImagePath);
+                artists.add(artist);
             }
         }
         if (c != null) {
@@ -134,43 +114,26 @@ public class DbContext implements IDbContext {
         }
         db.close();
 
-        return albums;
-
+        return artists;
     }
 
     @Override
-    public boolean addAlbum(@NonNull Album album, @NonNull List<Song> songs) {
-        this.addSongs(songs);
-
+    public long addSongsForArtist(@NonNull List<Song> songs, Artist artist) {
         SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
-        if(this.isEntityExist(db, AlbumEntity.TABLE_NAME, AlbumEntity.PATH, album.getPath())) {
-            return false;
+
+        Artist existingArtist = this.getArtistByName(db, artist.getName());
+        long artistId = 0;
+        if (existingArtist == null) {
+            artistId = this.addArtist(db, artist);
         }
 
-        ContentValues values = new ContentValues();
-        values.put(AlbumEntity.ID, album.getId());
-        values.put(AlbumEntity.NAME, album.getName());
-        values.put(AlbumEntity.ARTIST, album.getArtist());
-        values.put(AlbumEntity.PATH, album.getPath());
-        values.put(AlbumEntity.ALBUM_ART_PATH, album.getImagePath());
-
-        db.insert(AlbumEntity.TABLE_NAME, null, values);
-        db.close();
-
-        return true;
-    }
-
-    @Override
-    public void addSongs(@NonNull List<Song> songs) {
-        SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
         for(Song song: songs) {
             if(this.isEntityExist(db, SongEntity.TABLE_NAME, SongEntity.PATH, song.getPath())) {
-                return;
+                continue;
             }
 
             ContentValues values = new ContentValues();
-            values.put(SongEntity.ID, song.getId());
-            values.put(SongEntity.ALBUM_ID, song.getAlbumId());
+            values.put(SongEntity.ARTIST_ID, artistId);
             values.put(SongEntity.NAME, song.getName());
             values.put(SongEntity.PATH, song.getPath());
             values.put(SongEntity.DURATION, song.getDuration());
@@ -179,58 +142,65 @@ public class DbContext implements IDbContext {
             db.insert(SongEntity.TABLE_NAME, null, values);
         }
         db.close();
+        return artistId;
     }
 
     @Override
-    public void deleteAlbum(@NonNull Album album) {
+    public void deleteArtist(@NonNull Artist artist) {
         SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
 
-        String selection = AlbumEntity.ID + " LIKE ?";
-        String[] selectionArgs = {album.getId()};
-        db.delete(AlbumEntity.TABLE_NAME, selection, selectionArgs);
-        db.close();
+        String selection = ArtistEntity.ID + " = ?";
+        String[] selectionArgs = { String.valueOf(artist.getId()) };
+        db.delete(ArtistEntity.TABLE_NAME, selection, selectionArgs);
+        this.deleteSongsForArtist(db, artist);
 
-        this.removeAlbumSongs(album);
+        db.close();
     }
 
     @Override
     public void deleteSong(@NonNull Song song) {
         SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
-        String selection = SongEntity.ID + " LIKE ?";
-        String[] selectionArgs = {song.getId()};
-        db.delete(SongEntity.TABLE_NAME, selection, selectionArgs);
-        db.close();
-    }
-
-    private void removeAlbumSongs(@NonNull Album album) {
-        SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
-        String selection = SongEntity.ALBUM_ID + " LIKE ?";
-        String[] selectionArgs = {album.getId()};
+        String selection = SongEntity.ID + " = ?";
+        String[] selectionArgs = { String.valueOf(song.getId()) };
         db.delete(SongEntity.TABLE_NAME, selection, selectionArgs);
         db.close();
     }
 
     @Override
-    public ArrayList<Integer> printAllSongs() {
+    public ArrayList<SongFullInfo> getAllSongs() {
         SQLiteDatabase db = this.dbOpenHelper.getReadableDatabase();
 
-        String table = AlbumEntity.TABLE_NAME + " as Album inner join "+ SongEntity.TABLE_NAME +" as Song " +
-                "on Album."+ AlbumEntity.ID +" = Song." + SongEntity.ALBUM_ID;
+        String table = ArtistEntity.TABLE_NAME + " as Artists inner join "+ SongEntity.TABLE_NAME +" as Songs " +
+                "on Artists."+ ArtistEntity.ID +" = Songs." + SongEntity.ARTIST_ID;
         String[] columnNames = {
-                "Album."+ AlbumEntity.NAME +" as Album",
-                "Album."+ AlbumEntity.ARTIST +" as Artist",
-                "Song."+ SongEntity.NAME +" as Name",
-                "Song."+ SongEntity.DURATION +" as Duration",
+                "Songs."+ SongEntity.ID +" as Id",
+                "Artists."+ ArtistEntity.NAME +" as Artist",
+                "Songs."+ SongEntity.NAME +" as Title",
+                "Songs."+ SongEntity.DURATION +" as Duration",
+                "Songs."+ SongEntity.IMAGE_PATH +" as ImagePath"
         };
         Cursor c = db.query(table, columnNames, null, null, null, null, null);
-        ArrayList<Integer> durations = this.logCursor(c);
 
-        if (c != null) {
-            c.close();
+        ArrayList<SongFullInfo> result = new ArrayList<>();
+
+        while (c.moveToNext()) {
+            long id =
+                    c.getLong(c.getColumnIndex("Id"));
+            String artist =
+                    c.getString(c.getColumnIndexOrThrow("Artist"));
+            String title =
+                    c.getString(c.getColumnIndexOrThrow("Title"));
+            int duration =
+                    c.getInt(c.getColumnIndexOrThrow("Duration"));
+            String imagePath =
+                    c.getString(c.getColumnIndexOrThrow("ImagePath"));
+            result.add(new SongFullInfo(id, artist, title, imagePath, duration));
         }
+
+        c.close();
         db.close();
 
-        return durations;
+        return result;
     }
 
     private ArrayList<Integer> logCursor(Cursor c) {
@@ -253,5 +223,66 @@ public class DbContext implements IDbContext {
         return durations;
     }
 
+    private Artist getArtistByName(SQLiteDatabase db, String name) {
+        Artist artist = null;
+        String[] columnNames =  {
+                ArtistEntity.ID,
+                ArtistEntity.NAME,
+                ArtistEntity.IMAGE_PATH,
+        };
 
+        Cursor c = db.query(
+                ArtistEntity.TABLE_NAME, columnNames,
+                ArtistEntity.NAME + " LIKE ?", new String[] { name },
+                null, null, null);
+
+        if  (c != null && c.moveToNext()) {
+            long albumId = c
+                    .getLong(c.getColumnIndexOrThrow(ArtistEntity.ID));
+            String albumName =
+                    c.getString(c.getColumnIndexOrThrow(ArtistEntity.NAME));
+            String albumImagePath =
+                    c.getString(c.getColumnIndexOrThrow(ArtistEntity.IMAGE_PATH));
+            artist = new Artist(albumId, albumName, albumImagePath);
+        }
+
+        if (c != null) {
+            c.close();
+        }
+
+        return artist;
+    }
+
+    private long addArtist(SQLiteDatabase db, @NonNull Artist artist) {
+        Artist existingArtist = this.getArtistByName(db, artist.getName());
+        if (existingArtist != null) {
+            return artist.getId();
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(ArtistEntity.NAME, artist.getName());
+        values.put(ArtistEntity.IMAGE_PATH, artist.getImagePath());
+
+        return db.insert(ArtistEntity.TABLE_NAME, null, values);
+    }
+
+    private void deleteSongsForArtist(SQLiteDatabase db, @NonNull Artist artist) {
+        String selection = SongEntity.ARTIST_ID + " LIKE ?";
+        String[] selectionArgs = { String.valueOf(artist.getId()) };
+        db.delete(SongEntity.TABLE_NAME, selection, selectionArgs);
+    }
+
+    private boolean isEntityExist(SQLiteDatabase db, String tableName, String fieldName, String entryId) {
+        Cursor c = null;
+        try {
+            String query = "select count(*) from " + tableName + " where " + fieldName + " = ?";
+            c = db.rawQuery(query, new String[]{ entryId });
+            return c.moveToFirst() && c.getInt(0) != 0;
+        }
+        finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
 }

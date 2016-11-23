@@ -12,7 +12,9 @@ public final class LastFmService {
 
     public static String getSongCover(MusicUtils.SongInfo songInfo)
             throws JSONException, NetworkErrorException {
-        Uri uri = buildUrl(songInfo)
+        Uri uri = buildUrl()
+                .appendQueryParameter("artist", songInfo.artist)
+                .appendQueryParameter("track", songInfo.title)
                 .appendQueryParameter("method", "track.getinfo")
                 .build();
         JSONObject response = NetworkService.get(uri.toString());
@@ -29,21 +31,30 @@ public final class LastFmService {
                 .getString("#text");
     }
 
-    public static String genAlbomInfoUrl(MusicUtils.SongInfo songInfo) {
-        Uri uri = buildUrl(songInfo)
-                .appendQueryParameter("method", "albom.getinfo")
+    public static String getArtistImage(String artistName) throws NetworkErrorException, JSONException {
+        Uri uri = buildUrl()
+                .appendQueryParameter("track", artistName)
+                .appendQueryParameter("method", "artist.getinfo")
                 .build();
-        return uri.toString();
+
+        JSONObject response = NetworkService.get(uri.toString());
+        if (response == null) {
+            throw new NetworkErrorException();
+        }
+
+        return response
+                .getJSONObject("artist")
+                .getJSONArray("image")
+                .getJSONObject(2)
+                .getString("#text");
     }
 
-    private static Uri.Builder buildUrl(MusicUtils.SongInfo songInfo) {
+    private static Uri.Builder buildUrl() {
         return new Uri.Builder()
                 .scheme("http")
                 .authority("ws.audioscrobbler.com")
                 .path("2.0")
                 .appendQueryParameter("format", "json")
-                .appendQueryParameter("artist", songInfo.artist)
-                .appendQueryParameter("track", songInfo.title)
                 .appendQueryParameter("api_key", LAST_FM_API_KEY);
     }
 }

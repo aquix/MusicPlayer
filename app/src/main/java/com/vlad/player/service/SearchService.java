@@ -7,15 +7,14 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.data.source.DbObservableContext;
 import com.vlad.player.utils.MusicUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SearchService extends Service {
@@ -61,52 +60,44 @@ public class SearchService extends Service {
                 return;
             }
 
-            final HashMap<String, List<String>> music = new HashMap<>();
-            this.iterateFiles(searchStart.listFiles(), music);
-
-            for(String albumPath: music.keySet()) {
-                ArrayList<MusicUtils.SongInfo> songsInfo = new ArrayList<>();
-                List<String> songsFileName = music.get(albumPath);
-                for(String songFileName: songsFileName) {
-                    String songPath = albumPath + '/' + songFileName;
-                    MusicUtils.SongInfo songInfo = MusicUtils.extractSongInfo(songPath);
-                    songsInfo.add(songInfo);
+            ArrayList<File> allSongFiles = new ArrayList<>();
+            this.iterateFiles(searchStart.listFiles(), allSongFiles);
+            HashMap<String, List<Song>> groupedSongs = new HashMap<>();
+            for (File songFile : allSongFiles) {
+                MusicUtils.SongInfo songInfo = MusicUtils.extractSongInfo(songFile.getAbsolutePath());
+                String albumCover = MusicUtils.getCover(songInfo);
+                String songTitle = songInfo.title;
+                if (songTitle == null || songTitle.isEmpty()) {
+                    int nameLength = songFile.getName().length();
+                    // exclude .mp3 extension
+                    songTitle = songFile.getName().substring(nameLength - 4);
                 }
 
-                MusicUtils.SongInfo firstSongInfo = songsInfo.get(0);
-
-                String albumName = firstSongInfo.album;
-                String albumArtist = firstSongInfo.artist;
-                Album album = new Album(albumName, albumArtist, albumPath, MusicUtils.getCover(songsInfo.get(0)));
-                ArrayList<Song> songs = new ArrayList<>();
-                for(int i = 0; i < songsInfo.size(); ++i) {
-                    MusicUtils.SongInfo songInfo = songsInfo.get(i);
-                    String songName = songInfo.title;
-                    String songPath = albumPath + '/' + songsFileName.get(i);
-                    String albumCover = MusicUtils.getCover(songInfo);
-                    Song song = new Song(songName, songPath, albumCover, songInfo.duration, album.getId());
-                    songs.add(song);
+                Song song = new Song(songTitle, songFile.getAbsolutePath(), albumCover, songInfo.duration, 0);
+                if (!groupedSongs.containsKey(songInfo.artist)) {
+                    groupedSongs.put(songInfo.artist, new ArrayList<Song>());
                 }
-                SearchService.this.repository.addAlbum(album, songs);
+
+                groupedSongs.get(songInfo.artist).add(song);
+            }
+
+            for (String artistName : groupedSongs.keySet()) {
+                String artistImage = MusicUtils.getArtistImage(artistName);
+                Artist artist = new Artist(artistName, artistImage);
+                SearchService.this.repository.addSongsForArtist(groupedSongs.get(artistName), artist);
             }
 
             SearchService.this.isSearchActive = false;
             SearchService.this.stopSelf();
         }
 
-        private void iterateFiles(File[] files, HashMap<String, List<String>> music) {
+        private void iterateFiles(File[] files, ArrayList<File> allFiles) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    this.iterateFiles(file.listFiles(), music);
+                    this.iterateFiles(file.listFiles(), allFiles);
                 } else {
-                    String name = file.getName();
-                    if (name.endsWith(".mp3")) {
-                        String dirPath = file.getParent();
-                        if (!music.containsKey(dirPath)) {
-                            music.put(dirPath, new LinkedList<String>());
-                        }
-                        List<String> songNames = music.get(dirPath);
-                        songNames.add(name);
+                    if (file.getName().endsWith(".mp3")) {
+                        allFiles.add(file);
                     }
                 }
             }

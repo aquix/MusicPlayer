@@ -3,8 +3,9 @@ package com.vlad.player.data.source;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
+import com.vlad.player.data.viewmodels.SongFullInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DbObservableContext implements IDbContext {
     public interface AlbumsRepositoryObserver {
-        void onAlbumsChanged();
+        void onArtistsChanged();
     }
 
     private static DbObservableContext instance = null;
@@ -26,8 +27,8 @@ public class DbObservableContext implements IDbContext {
 
     private List<AlbumsRepositoryObserver> observers = new ArrayList<>();
 
-    private Map<String, Album> cachedAlbums;
-    private Map<String, Song> cachedSongs;
+    private Map<Long, Artist> cachedAlbums;
+    private Map<Long, Song> cachedSongs;
 
     private boolean isAlbumsCacheDirty = true;
     private boolean isSongsCacheDirty = true;
@@ -56,45 +57,18 @@ public class DbObservableContext implements IDbContext {
     }
 
     @Override
-    public boolean addAlbum(@NonNull Album album, @NonNull List<Song> songs) {
-        this.addSongs(songs);
-        if (this.cachedAlbums == null) {
-            this.cachedAlbums = new LinkedHashMap<>();
-        }
-        this.cachedAlbums.put(album.getId(), album);
-
-        boolean successState = this.db.addAlbum(album, songs);
-        if (successState) {
-            this.notifyAlbumsChanged();
-        }
-        return successState;
-    }
-
-    @Override
-    public void addSongs(@NonNull List<Song> songs) {
-        this.db.addSongs(songs);
-
-        if (this.cachedSongs == null) {
-            this.cachedSongs = new LinkedHashMap<>();
-        }
-        for(Song song: songs) {
-            this.cachedSongs.put(song.getId(), song);
-        }
-    }
-
-    @Override
-    public void deleteAlbum(@NonNull Album album) {
-        this.db.deleteAlbum(album);
+    public void deleteArtist(@NonNull Artist artist) {
+        this.db.deleteArtist(artist);
 
         if (this.cachedAlbums != null) {
-            if (this.cachedAlbums.containsKey(album.getId())) {
-                this.cachedAlbums.remove(album.getId());
+            if (this.cachedAlbums.containsKey(artist.getId())) {
+                this.cachedAlbums.remove(artist.getId());
             }
         }
 
         if (this.cachedSongs != null) {
             for(Song song: this.cachedSongs.values()) {
-                if (album.getId().equals(song.getAlbumId())) {
+                if (artist.getId() == song.getArtistId()) {
                     this.cachedSongs.remove(song.getId());
                 }
             }
@@ -113,66 +87,78 @@ public class DbObservableContext implements IDbContext {
             }
         }
     }
-    public Album getAlbum(String albumId) {
+
+    public Artist getArtist(long albumId) {
         if(this.cachedAlbums == null) {
-            this.getAlbums();
+            this.getAllArtists();
         }
         return this.cachedAlbums.get(albumId);
     }
 
     @NonNull
     @Override
-    public List<Album> getAlbums() {
+    public List<Artist> getAllArtists() {
         if (!this.isAlbumsCacheDirty) {
             return this.getCachedAlbums();
         } else {
-            List<Album> albums = this.db.getAlbums();
+            List<Artist> artists = this.db.getAllArtists();
 
             this.cachedAlbums = new LinkedHashMap<>();
-            for(Album album: albums) {
-                this.cachedAlbums.put(album.getId(), album);
+            for(Artist artist : artists) {
+                this.cachedAlbums.put(artist.getId(), artist);
             }
             this.isAlbumsCacheDirty = false;
 
-            return albums;
+            return artists;
         }
     }
 
-    @NonNull
     @Override
-    public List<Song> getSongs(@NonNull String albumId, boolean sortByName) {
+    public long addSongsForArtist(@NonNull List<Song> songs, Artist artist) {
+        if (this.cachedAlbums == null) {
+            this.cachedAlbums = new LinkedHashMap<>();
+        }
+        long newArtistId = this.db.addSongsForArtist(songs, artist);
+        artist.updateId(newArtistId);
+        this.cachedAlbums.put(newArtistId, artist);
+        this.notifyAlbumsChanged();
+        return newArtistId;
+    }
+
+    @Override
+    public List<Song> getSongsForArtist(long artistId, boolean sortByName) {
         if (!this.isSongsCacheDirty) {
-            return this.getCachedSongs(albumId, sortByName);
+            return this.getCachedSongs(artistId, sortByName);
         } else {
-            List<Album> albums = this.db.getAlbums();
+            List<Artist> artists = this.db.getAllArtists();
             this.cachedSongs = new LinkedHashMap<>();
-            for(Album nextAlbum: albums) {
-                for(Song nextSong: this.db.getSongs(nextAlbum.getId(), sortByName)) {
+            for(Artist nextArtist : artists) {
+                for(Song nextSong: this.db.getSongsForArtist(nextArtist.getId(), sortByName)) {
                     this.cachedSongs.put(nextSong.getId(), nextSong);
                 }
             }
 
             this.isSongsCacheDirty = false;
-            return this.getCachedSongs(albumId, sortByName);
+            return this.getCachedSongs(artistId, sortByName);
         }
     }
 
     @Override
-    public ArrayList<Integer>  printAllSongs() {
-        return this.db.printAllSongs();
+    public ArrayList<SongFullInfo> getAllSongs() {
+        return this.db.getAllSongs();
     }
 
     private void notifyAlbumsChanged() {
         for(AlbumsRepositoryObserver observer: this.observers) {
-            observer.onAlbumsChanged();
+            observer.onArtistsChanged();
         }
     }
 
-    private List<Album> getCachedAlbums() {
-        return this.cachedAlbums == null ? new ArrayList<Album>() : new ArrayList<>(this.cachedAlbums.values());
+    private List<Artist> getCachedAlbums() {
+        return this.cachedAlbums == null ? new ArrayList<Artist>() : new ArrayList<>(this.cachedAlbums.values());
     }
 
-    private List<Song> getCachedSongs(@NonNull String albumId, boolean sortByName) {
+    private List<Song> getCachedSongs(long artistId, boolean sortByName) {
         Comparator<Song> comparator;
         if (sortByName) {
             comparator = new Comparator<Song>() {
@@ -196,7 +182,7 @@ public class DbObservableContext implements IDbContext {
 
         ArrayList<Song> songs = new ArrayList<>();
         for(Song song: this.cachedSongs.values()) {
-            if (song.getAlbumId().equals(albumId)) {
+            if (song.getArtistId() == artistId) {
                 songs.add(song);
             }
         }

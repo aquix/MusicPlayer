@@ -3,18 +3,15 @@ package com.vlad.player.utils;
 import android.accounts.NetworkErrorException;
 import android.media.MediaMetadataRetriever;
 
-import com.vlad.player.data.Song;
-
 import org.json.JSONException;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
-import java.util.List;
 
 public final class MusicUtils {
     private static final String DEFAULT_COVER =
             "https://yt3.ggpht.com/0v8T0CTAv8VPxA5lJtz-tqJe-tR-3VQc0ONhD6Az2RWjNRnwh5QQzPYz5I7wbYljU_tQjZ2ok2W59_v_=s900-nd-c-c0xffffffff-rj-k-no";
+
     public static class SongInfo {
         public String artist;
         public String album;
@@ -31,6 +28,17 @@ public final class MusicUtils {
         }
 
         return coverUrl;
+    }
+
+    public static String getArtistImage(String artistName) {
+        String imageUrl;
+        try {
+            imageUrl = LastFmService.getArtistImage(artistName);
+        } catch (JSONException | NetworkErrorException e) {
+            imageUrl = DEFAULT_COVER;
+        }
+
+        return imageUrl;
     }
 
     private static SongInfo getEmptySongInfo() {

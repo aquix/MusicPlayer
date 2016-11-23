@@ -2,8 +2,9 @@ package com.vlad.player.data.source;
 
 import android.support.annotation.NonNull;
 
-import com.vlad.player.data.Album;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Artist;
+import com.vlad.player.data.models.Song;
+import com.vlad.player.data.viewmodels.SongFullInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,19 +12,15 @@ import java.util.List;
 public interface IDbContext {
 
     @NonNull
-    List<Album> getAlbums();
+    List<Artist> getAllArtists();
 
-    @NonNull
-    List<Song> getSongs(@NonNull String albumId, boolean sortByName);
+    long addSongsForArtist(@NonNull List<Song> songs, Artist artist);
 
-    boolean addAlbum(@NonNull Album album, @NonNull List<Song> songs);
+    List<Song> getSongsForArtist(long artistId, boolean sortByName);
 
-    void addSongs(@NonNull List<Song> songs);
-
-    void deleteAlbum(@NonNull Album album);
+    void deleteArtist(@NonNull Artist artist);
 
     void deleteSong(@NonNull Song song);
 
-    ArrayList<Integer> printAllSongs();
-
+    ArrayList<SongFullInfo> getAllSongs();
 }

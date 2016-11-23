@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 import com.squareup.picasso.Picasso;
 
 

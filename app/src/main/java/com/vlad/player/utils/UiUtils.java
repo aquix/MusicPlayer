@@ -8,7 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.ui.song.SongFragment;
 
 import java.util.ArrayList;

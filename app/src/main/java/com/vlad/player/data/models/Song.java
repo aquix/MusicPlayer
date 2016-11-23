@@ -1,44 +1,42 @@
-package com.vlad.player.data;
+package com.vlad.player.data.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.UUID;
 
 import com.google.common.base.Objects;
 
 
 public class Song implements Parcelable {
-    private String id;
+    private long id;
     private String name;
     private String path;
     private String imagePath;
     private int duration;
-    private String albumId;
+    private long artistId;
 
-    public Song(String name, String path, String imagePath, int duration, String albumId) {
-        this(UUID.randomUUID().toString(), name, path, imagePath, duration, albumId);
+    public Song(String name, String path, String imagePath, int duration, long artistId) {
+        this(0, name, path, imagePath, duration, artistId);
     }
 
-    public Song(String id, String name, String path, String imagePath, int duration, String albumId) {
+    public Song(long id, String name, String path, String imagePath, int duration, long artistId) {
         this.id = id;
         this.name = name;
         this.path = path;
         this.imagePath = imagePath;
         this.duration = duration;
-        this.albumId = albumId;
+        this.artistId = artistId;
     }
 
     private Song(Parcel parcel) {
-        this.id = parcel.readString();
+        this.id = parcel.readLong();
         this.name = parcel.readString();
         this.path = parcel.readString();
         this.imagePath = parcel.readString();
         this.duration = parcel.readInt();
-        this.albumId = parcel.readString();
+        this.artistId = parcel.readLong();
     }
 
-    public String getId() {
+    public long getId() {
         return this.id;
     }
 
@@ -50,8 +48,8 @@ public class Song implements Parcelable {
         return this.path;
     }
 
-    public String getAlbumId() {
-        return this.albumId;
+    public long getArtistId() {
+        return this.artistId;
     }
 
     public int getDuration() {
@@ -69,12 +67,12 @@ public class Song implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(this.id);
+        parcel.writeLong(this.id);
         parcel.writeString(this.name);
         parcel.writeString(this.path);
         parcel.writeString(this.imagePath);
         parcel.writeInt(this.duration);
-        parcel.writeString(this.albumId);
+        parcel.writeLong(this.artistId);
     }
 
     public static final Parcelable.Creator<Song> CREATOR = new Parcelable.Creator<Song>() {
@@ -101,7 +99,7 @@ public class Song implements Parcelable {
                 Objects.equal(this.path, song.getPath()) &&
                 Objects.equal(this.imagePath, song.getImagePath()) &&
                 Objects.equal(this.duration, song.getDuration()) &&
-                Objects.equal(this.albumId, song.getAlbumId());
+                Objects.equal(this.artistId, song.getArtistId());
     }
 
 }

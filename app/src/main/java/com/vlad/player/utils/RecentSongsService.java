@@ -1,6 +1,6 @@
 package com.vlad.player.utils;
 
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 
 import java.util.LinkedList;
 import java.util.List;

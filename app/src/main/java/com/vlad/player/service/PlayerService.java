@@ -13,7 +13,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.ui.songs.SongsActivity;
 import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.RecentSongsService;
@@ -49,7 +49,7 @@ public class PlayerService extends Service implements
 
     private int currentSongIndex = -1;
     private ArrayList<Song> songs;
-    private String albumId;
+    private long artistId;
     private boolean wasPrepared = false;
 
     private Thread positionNotifierThread;
@@ -137,16 +137,16 @@ public class PlayerService extends Service implements
     }
 
     public void play(int songIndex, ArrayList<Song> songs) {
-        String albumId = songs.get(songIndex).getAlbumId();
+        long albumId = songs.get(songIndex).getArtistId();
         boolean isPause = !this.mediaPlayer.isPlaying();
-        boolean isSongNotChanged = albumId.equals(this.albumId) && songIndex == this.currentSongIndex;
+        boolean isSongNotChanged = albumId == this.artistId && songIndex == this.currentSongIndex;
 
         if (isPause && isSongNotChanged) {
             this.mediaPlayer.start();
         } else {
             this.currentSongIndex = songIndex;
             this.songs = songs;
-            this.albumId = albumId;
+            this.artistId = albumId;
 
             this.setCurrentDataSource();
             this.mediaPlayer.prepareAsync();
@@ -220,7 +220,7 @@ public class PlayerService extends Service implements
         this.wasPrepared = true;
         RecentSongsService.addToRecent(this.songs.get(this.currentSongIndex));
         this.startForeground(NOTIFICATION_ID, this.getNotification());
-        for (PlayerCallback callback : callbacks) {
+        for (PlayerCallback callback : this.callbacks) {
             this.notifyNewState(callback);
         }
         if (!this.positionNotifierThread.isAlive()) {

@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.vlad.player.R;
-import com.vlad.player.data.Song;
+import com.vlad.player.data.models.Song;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.UiUtils;

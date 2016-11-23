@@ -16,7 +16,7 @@
         android:id="@+id/recent_songs"/>
 
     <TextView
-        android:text="@string/albums"
+        android:text="@string/artists"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"

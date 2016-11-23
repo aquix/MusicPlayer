@@ -1,4 +1,4 @@
-package com.vlad.player.ui.albums;
+package com.vlad.player.ui.artists;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.vlad.player.R;
 import com.vlad.player.service.SearchService;
+import com.vlad.player.ui.songs.AllSongsActivity;
 
 public class AlbumsActivity extends AppCompatActivity {
     private static String[] PERMISSIONS;
@@ -85,6 +86,9 @@ public class AlbumsActivity extends AppCompatActivity {
             case R.id.albums_search_menu:
                 this.requestPermAndSearchMusic();
                 return true;
+            case R.id.albums_show_all:
+                Intent intent = new Intent(this, AllSongsActivity.class);
+                this.startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
