@@ -91,6 +91,9 @@ class AllSongsListAdapter extends BaseAdapter {
         holder.songDuration.setText(this.formatDuration(song.Duration));
 
         String songImageUrl = song.ImagePath;
-        Picasso.with(this.activity).load(songImageUrl).into(holder.image);
+        Picasso.with(this.activity)
+                .load(songImageUrl)
+                .error(R.drawable.album_art_default)
+                .into(holder.image);
     }
 }

@@ -4,8 +4,7 @@ import android.app.ListActivity;
 import android.os.Bundle;
 
 import com.vlad.player.R;
-import com.vlad.player.data.models.Artist;
-import com.vlad.player.data.source.DbObservableContext;
+import com.vlad.player.data.services.DbObservableContext;
 import com.vlad.player.data.viewmodels.SongFullInfo;
 
 import java.util.List;

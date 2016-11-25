@@ -1,4 +1,4 @@
-package com.vlad.player.data.source;
+package com.vlad.player.data.services;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -146,6 +146,19 @@ public class DbObservableContext implements IDbContext {
     @Override
     public ArrayList<SongFullInfo> getAllSongs() {
         return this.db.getAllSongs();
+    }
+
+    @Override
+    public void clearDb() {
+        this.db.clearDb();
+        if (this.cachedAlbums != null) {
+            this.cachedAlbums.clear();
+        }
+        if (this.cachedSongs != null) {
+            this.cachedSongs.clear();
+        }
+
+        this.notifyAlbumsChanged();
     }
 
     private void notifyAlbumsChanged() {

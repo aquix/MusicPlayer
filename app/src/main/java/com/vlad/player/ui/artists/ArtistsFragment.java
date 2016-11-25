@@ -25,7 +25,7 @@ import android.widget.AdapterView;
 import com.vlad.player.R;
 import com.vlad.player.data.models.Artist;
 import com.vlad.player.data.models.Song;
-import com.vlad.player.data.source.DbObservableContext;
+import com.vlad.player.data.services.DbObservableContext;
 import com.vlad.player.data.viewmodels.SongFullInfo;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.ui.view.HeaderGridView;
@@ -34,7 +34,7 @@ import com.vlad.player.utils.RecentSongsService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlbumsFragment extends Fragment implements
+public class ArtistsFragment extends Fragment implements
         DbObservableContext.AlbumsRepositoryObserver,
         PlayerService.PlayerCallback {
 
@@ -49,9 +49,9 @@ public class AlbumsFragment extends Fragment implements
 
     private View header;
 
-    private AlbumsListAdapter albumsListAdapter;
-    private AlbumsRecentAdapter albumsRecentAdapter;
-    private DbObservableContext musicRepository;
+    private ArtistsListAdapter artistsListAdapter;
+    private RecentArtistsAdapter recentArtistsAdapter;
+    private DbObservableContext dbService;
     private Handler mainHandler;
 
     private PlayerService playerService;
@@ -59,19 +59,19 @@ public class AlbumsFragment extends Fragment implements
 
     private List<Artist> artists;
 
-    public AlbumsFragment() {}
+    public ArtistsFragment() {}
 
-    public static AlbumsFragment newInstance() {
-        return new AlbumsFragment();
+    public static ArtistsFragment newInstance() {
+        return new ArtistsFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.musicRepository = DbObservableContext.getInstance(this.getContext());
-        this.musicRepository.addContentObserver(this);
+        this.dbService = DbObservableContext.getInstance(this.getContext());
+        this.dbService.addContentObserver(this);
         ArrayList<Integer> durations = new ArrayList<>();
-        ArrayList<SongFullInfo> allSongs = this.musicRepository.getAllSongs();
+        ArrayList<SongFullInfo> allSongs = this.dbService.getAllSongs();
         for (SongFullInfo song : allSongs) {
             durations.add(song.Duration);
         }
@@ -85,10 +85,8 @@ public class AlbumsFragment extends Fragment implements
 
         long startTime = System.currentTimeMillis();
         long sum = 0;
-        for(int j = 0; j < 500; ++j) {
-            for (Integer value : durations) {
-                sum += value;
-            }
+        for (Integer value : durations) {
+            sum += value;
         }
         Log.d("Java all songs duration", Long.toString(sum));
         Log.d("Java running time", "" + (System.currentTimeMillis() - startTime));
@@ -102,15 +100,15 @@ public class AlbumsFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.albums_fragment, container, false);
-        this.header = inflater.inflate(R.layout.albums_list_footer, container, false);
+        View view = inflater.inflate(R.layout.artists_fragment, container, false);
+        this.header = inflater.inflate(R.layout.artists_list_header, container, false);
 
 
         HeaderGridView albumsGrid = (HeaderGridView) view.findViewById(R.id.albums_grid);
         this.setColumnsCount(albumsGrid);
-        this.albumsListAdapter = new AlbumsListAdapter(this.getActivity());
+        this.artistsListAdapter = new ArtistsListAdapter(this.getActivity());
         this.addRecentSongsHeader(albumsGrid);
-        albumsGrid.setAdapter(this.albumsListAdapter);
+        albumsGrid.setAdapter(this.artistsListAdapter);
         this.loadAlbums();
 
         this.registerForContextMenu(albumsGrid);
@@ -129,8 +127,8 @@ public class AlbumsFragment extends Fragment implements
         RecyclerView songsList = (RecyclerView) this.header.findViewById(R.id.recent_songs);
         songsList.setLayoutManager(layoutManager);
 
-        this.albumsRecentAdapter = new AlbumsRecentAdapter(recentSongs, this.getContext());
-        songsList.setAdapter(this.albumsRecentAdapter);
+        this.recentArtistsAdapter = new RecentArtistsAdapter(recentSongs, this.getContext());
+        songsList.setAdapter(this.recentArtistsAdapter);
         if(recentSongs.isEmpty()) {
             this.header.setVisibility(View.GONE);
         }
@@ -138,8 +136,8 @@ public class AlbumsFragment extends Fragment implements
     }
 
     private void loadAlbums() {
-        this.artists = this.musicRepository.getAllArtists();
-        this.albumsListAdapter.replaceData(this.artists);
+        this.artists = this.dbService.getAllArtists();
+        this.artistsListAdapter.replaceData(this.artists);
     }
 
     private void setColumnsCount(HeaderGridView albumsGrid) {
@@ -156,7 +154,7 @@ public class AlbumsFragment extends Fragment implements
         this.mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                AlbumsFragment.this.loadAlbums();
+                ArtistsFragment.this.loadAlbums();
             }
         });
     }
@@ -170,7 +168,7 @@ public class AlbumsFragment extends Fragment implements
 
         if (!RecentSongsService.getRecent().isEmpty()) {
             this.header.setVisibility(View.VISIBLE);
-            this.albumsRecentAdapter.notifyDataSetChanged();
+            this.recentArtistsAdapter.notifyDataSetChanged();
         }
         Log.d(TAG_LIFECYCLE, "onStart");
     }
@@ -183,7 +181,7 @@ public class AlbumsFragment extends Fragment implements
             this.getActivity().unbindService(this.mConnection);
             this.isServiceBound = false;
         }
-        this.musicRepository.removeContentObserver(this);
+        this.dbService.removeContentObserver(this);
         Log.d(TAG_LIFECYCLE, "onStop");
     }
 
@@ -192,7 +190,7 @@ public class AlbumsFragment extends Fragment implements
                                     ContextMenu.ContextMenuInfo info) {
         super.onCreateContextMenu(menu, view, info);
         MenuInflater inflater = this.getActivity().getMenuInflater();
-        inflater.inflate(R.menu.list_context_menu, menu);
+        inflater.inflate(R.menu.artists_context_menu, menu);
     }
 
     @Override
@@ -202,8 +200,8 @@ public class AlbumsFragment extends Fragment implements
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 int position = info.position - 2;
                 Artist artist = this.artists.get(position);
-                this.albumsListAdapter.removeArtist(artist);
-                this.musicRepository.deleteArtist(artist);
+                this.artistsListAdapter.removeArtist(artist);
+                this.dbService.deleteArtist(artist);
                 break;
         }
         return super.onContextItemSelected(item);
@@ -211,9 +209,9 @@ public class AlbumsFragment extends Fragment implements
 
     private void setActiveArtist(boolean isPlaying, Song song) {
         if (isPlaying) {
-            this.albumsListAdapter.setPlayingArtist(song.getArtistId());
+            this.artistsListAdapter.setPlayingArtist(song.getArtistId());
         } else {
-            this.albumsListAdapter.setPlayingArtist(-1);
+            this.artistsListAdapter.setPlayingArtist(-1);
         }
     }
 
@@ -236,14 +234,14 @@ public class AlbumsFragment extends Fragment implements
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
-            AlbumsFragment.this.playerService = binder.getService();
-            AlbumsFragment.this.playerService.addPlayerListener(AlbumsFragment.this);
-            AlbumsFragment.this.isServiceBound = true;
+            ArtistsFragment.this.playerService = binder.getService();
+            ArtistsFragment.this.playerService.addPlayerListener(ArtistsFragment.this);
+            ArtistsFragment.this.isServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            AlbumsFragment.this.isServiceBound = false;
+            ArtistsFragment.this.isServiceBound = false;
         }
     };
 

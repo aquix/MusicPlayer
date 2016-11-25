@@ -33,7 +33,7 @@ public final class LastFmService {
 
     public static String getArtistImage(String artistName) throws NetworkErrorException, JSONException {
         Uri uri = buildUrl()
-                .appendQueryParameter("track", artistName)
+                .appendQueryParameter("artist", artistName)
                 .appendQueryParameter("method", "artist.getinfo")
                 .build();
 

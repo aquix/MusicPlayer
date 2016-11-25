@@ -1,16 +1,15 @@
-package com.vlad.player.data.source;
+package com.vlad.player.data.services;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.vlad.player.data.models.Artist;
 import com.vlad.player.data.models.Song;
-import com.vlad.player.data.source.DbConstants.ArtistEntity;
-import com.vlad.player.data.source.DbConstants.SongEntity;
+import com.vlad.player.data.services.DbConstants.ArtistEntity;
+import com.vlad.player.data.services.DbConstants.SongEntity;
 import com.vlad.player.data.viewmodels.SongFullInfo;
 
 import java.util.ArrayList;
@@ -203,24 +202,15 @@ public class DbContext implements IDbContext {
         return result;
     }
 
-    private ArrayList<Integer> logCursor(Cursor c) {
-        ArrayList<Integer> durations = new ArrayList<>();
-        if (c != null) {
-            if (c.moveToFirst()) {
-                String str;
-                do {
-                    str = "";
-                    for (String cn : c.getColumnNames()) {
-                        str = str.concat(cn + " = " + c.getString(c.getColumnIndex(cn)) + "; ");
-                        durations.add(c.getInt(c.getColumnIndex("Duration")));
-                    }
-                    Log.d(LOG_TAG, str);
-                } while (c.moveToNext());
-            }
-        } else {
-            Log.d(LOG_TAG, "Cursor is null");
-        }
-        return durations;
+    @Override
+    public void clearDb() {
+        String clearArtistsQuery = "delete from " + ArtistEntity.TABLE_NAME;
+        String clearSongsQuery = "delete from " + SongEntity.TABLE_NAME;
+
+        SQLiteDatabase db = this.dbOpenHelper.getWritableDatabase();
+        db.rawQuery(clearArtistsQuery, null);
+        db.rawQuery(clearSongsQuery, null);
+        db.close();
     }
 
     private Artist getArtistByName(SQLiteDatabase db, String name) {

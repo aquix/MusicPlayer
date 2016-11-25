@@ -158,8 +158,18 @@ public class PlayerService extends Service implements
             this.mediaPlayer.pause();
         }
 
-        Log.d("thread", "interrupted");
         this.positionNotifierThread.interrupt();
+    }
+
+    public void stop() {
+        if (this.mediaPlayer != null) {
+            this.mediaPlayer.stop();
+        }
+
+        this.positionNotifierThread.interrupt();
+
+        this.stopForeground(true);
+        this.stopSelf();
     }
 
     public void seekTo(int songPosition) {
@@ -186,7 +196,7 @@ public class PlayerService extends Service implements
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentTitle(this.getString(R.string.current_playing))
-                .setSmallIcon(R.drawable.playing_indicator)
+                .setSmallIcon(R.drawable.ic_notification_icon)
                 .setContentText(this.songs.get(this.currentSongIndex).getName())
                 .setContentIntent(PendingIntent.getActivity(this, 0, songIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
@@ -220,6 +230,7 @@ public class PlayerService extends Service implements
         this.wasPrepared = true;
         RecentSongsService.addToRecent(this.songs.get(this.currentSongIndex));
         this.startForeground(NOTIFICATION_ID, this.getNotification());
+        Notification n = this.getNotification();
         for (PlayerCallback callback : this.callbacks) {
             this.notifyNewState(callback);
         }

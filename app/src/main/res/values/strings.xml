@@ -12,6 +12,7 @@
     <string name="recent_songs">Recent Songs</string>
     <string name="artists">Albums</string>
     <string name="remove">Remove</string>
+    <string name="remove_from_disk">Remove from disk</string>
     <string name="current_playing">Current playing</string>
     <string name="read_storage_not_granted">Storage permission not granted!</string>
     <string name="delete_failed">Delete was failde.</string>

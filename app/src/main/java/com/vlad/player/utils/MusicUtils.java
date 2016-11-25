@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 
 public final class MusicUtils {
     private static final String DEFAULT_COVER =
-            "https://yt3.ggpht.com/0v8T0CTAv8VPxA5lJtz-tqJe-tR-3VQc0ONhD6Az2RWjNRnwh5QQzPYz5I7wbYljU_tQjZ2ok2W59_v_=s900-nd-c-c0xffffffff-rj-k-no";
+            "any incorrect string";
 
     public static class SongInfo {
         public String artist;

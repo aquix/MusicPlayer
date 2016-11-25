@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.artists.AlbumsActivity">
+        <activity android:name=".ui.artists.ArtistsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,11 +22,11 @@
         <activity
             android:name=".ui.songs.SongsActivity"
             android:exported="false"
-            android:parentActivityName=".ui.artists.AlbumsActivity"
+            android:parentActivityName=".ui.artists.ArtistsActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.vlad.player.ui.artists.AlbumsActivity" />
+                android:value="com.vlad.player.ui.artists.ArtistsActivity" />
         </activity>
 
         <service

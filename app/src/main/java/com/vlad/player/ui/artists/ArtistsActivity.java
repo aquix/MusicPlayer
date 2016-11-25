@@ -22,7 +22,7 @@ import com.vlad.player.R;
 import com.vlad.player.service.SearchService;
 import com.vlad.player.ui.songs.AllSongsActivity;
 
-public class AlbumsActivity extends AppCompatActivity {
+public class ArtistsActivity extends AppCompatActivity {
     private static String[] PERMISSIONS;
 
     static {
@@ -41,16 +41,16 @@ public class AlbumsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.albums_activity);
+        this.setContentView(R.layout.artists_activity);
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         this.setSupportActionBar(toolbar);
 
-        AlbumsFragment albumsFragment =
-                (AlbumsFragment) this.getSupportFragmentManager().findFragmentById(R.id.content_frame);
-        if (albumsFragment == null) {
-            albumsFragment = AlbumsFragment.newInstance();
+        ArtistsFragment artistsFragment =
+                (ArtistsFragment) this.getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        if (artistsFragment == null) {
+            artistsFragment = ArtistsFragment.newInstance();
             FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.content_frame, albumsFragment);
+            transaction.add(R.id.content_frame, artistsFragment);
             transaction.commit();
         }
     }
@@ -113,21 +113,21 @@ public class AlbumsActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = this.getMenuInflater();
-        inflater.inflate(R.menu.albums_menu, menu);
+        inflater.inflate(R.menu.artists_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             SearchService.LocalBinder binder = (SearchService.LocalBinder) service;
-            AlbumsActivity.this.searchService = binder.getService();
-            AlbumsActivity.this.searchService.startMusicSearch();
-            AlbumsActivity.this.isServiceBound = true;
+            ArtistsActivity.this.searchService = binder.getService();
+            ArtistsActivity.this.searchService.startMusicSearch();
+            ArtistsActivity.this.isServiceBound = true;
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            AlbumsActivity.this.searchService = null;
-            AlbumsActivity.this.isServiceBound = false;
+            ArtistsActivity.this.searchService = null;
+            ArtistsActivity.this.isServiceBound = false;
         }
     };
 

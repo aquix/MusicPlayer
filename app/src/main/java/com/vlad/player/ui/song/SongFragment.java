@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.os.Handler;
 
 import com.vlad.player.R;
 import com.vlad.player.data.models.Song;
@@ -27,7 +28,6 @@ import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.UiUtils;
 
 import java.util.ArrayList;
-import java.util.logging.Handler;
 
 public class SongFragment extends Fragment implements PlayerService.PlayerCallback {
     private ViewPager songPager;
@@ -42,8 +42,6 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
     private boolean isPlaying;
 
     private Toolbar toolbar;
-
-    private Handler handler;
 
     public SongFragment() { }
 
@@ -85,7 +83,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         this.seekBar = (SeekBar) view.findViewById(R.id.song_seek_bar);
 
 
-        this.updateSongDate();
+        this.updateSongData();
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,11 +98,32 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             }
         });
         this.playButton.setOnTouchListener(new View.OnTouchListener() {
+            private int LONG_PRESS_TIME = 500;
+            private boolean wasLongPress = false;
+
+            final Handler handler = new Handler();
+            Runnable longPressed = new Runnable() {
+                public void run() {
+                    wasLongPress = true;
+                    SongFragment.this.stopSong();
+                }
+            };
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        this.handler.postDelayed(this.longPressed, this.LONG_PRESS_TIME);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        this.handler.removeCallbacks(this.longPressed);
+                        break;
                     case MotionEvent.ACTION_UP:
-                        SongFragment.this.togglePlayPause();
+                        this.handler.removeCallbacks(this.longPressed);
+                        if (!this.wasLongPress) {
+                            SongFragment.this.togglePlayPause();
+                        }
+                        this.wasLongPress = false;
                         break;
                 }
                 return true;
@@ -131,7 +150,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         outState.putParcelable(Constants.SONG_BUNDLE.OPENED_SONG, this.songs.get(this.songIndex));
     }
 
-    private void updateSongDate() {
+    private void updateSongData() {
         if (this.songPager.getCurrentItem() != this.songIndex) {
             this.songPager.setCurrentItem(this.songIndex, true);
         }
@@ -153,7 +172,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
             this.playerService.pause();
         }
 
-        this.updateSongDate();
+        this.updateSongData();
     }
 
     public void togglePlayPause() {
@@ -166,9 +185,16 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         this.updatePlayPauseButton();
     }
 
+    public void stopSong() {
+        this.playerService.stop();
+
+        this.isPlaying = false;
+        this.updatePlayPauseButton();
+    }
+
     private void playSong() {
         this.playerService.play(this.songIndex, this.songs);
-        this.updateSongDate();
+        this.updateSongData();
     }
 
     public void addSwipeGestureControl(View panel) {
@@ -239,14 +265,14 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         }
 
         this.seekBar.setMax(this.songs.get(this.songIndex).getDuration());
-        this.updateSongDate();
+        this.updateSongData();
     }
 
     @Override
     public void onNextSong(boolean isPlaying, Song song) {
         this.songIndex = this.songs.indexOf(song);
         this.isPlaying = isPlaying;
-        this.updateSongDate();
+        this.updateSongData();
     }
 
     @Override

@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 
 import com.vlad.player.data.models.Artist;
 import com.vlad.player.data.models.Song;
-import com.vlad.player.data.source.DbObservableContext;
+import com.vlad.player.data.services.DbObservableContext;
 import com.vlad.player.utils.MusicUtils;
 
 import java.io.File;
@@ -19,11 +19,11 @@ import java.util.List;
 
 public class SearchService extends Service {
     private final IBinder binder = new LocalBinder();
-    private final DbObservableContext repository;
+    private final DbObservableContext dbService;
     private boolean isSearchActive = false;
 
     public SearchService() {
-        this.repository = DbObservableContext.getInstance(this);
+        this.dbService = DbObservableContext.getInstance(this);
     }
 
     public class LocalBinder extends Binder {
@@ -53,6 +53,7 @@ public class SearchService extends Service {
     private class MusicSearcherThread implements Runnable {
         @Override
         public void run() {
+            SearchService.this.dbService.clearDb();
             File musicFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
             String musicFolderPath = musicFolder.getAbsolutePath();
             File searchStart = new File(musicFolderPath);
@@ -84,7 +85,7 @@ public class SearchService extends Service {
             for (String artistName : groupedSongs.keySet()) {
                 String artistImage = MusicUtils.getArtistImage(artistName);
                 Artist artist = new Artist(artistName, artistImage);
-                SearchService.this.repository.addSongsForArtist(groupedSongs.get(artistName), artist);
+                SearchService.this.dbService.addSongsForArtist(groupedSongs.get(artistName), artist);
             }
 
             SearchService.this.isSearchActive = false;

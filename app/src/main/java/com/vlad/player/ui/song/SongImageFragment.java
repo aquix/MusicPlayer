@@ -42,7 +42,10 @@ public class SongImageFragment extends Fragment {
 
         ImageView image = (ImageView) view.findViewById(R.id.song_image);
         String imageUrl = this.song.getImagePath();
-        Picasso.with(this.getContext()).load(imageUrl).into(image);
+        Picasso.with(this.getContext())
+                .load(imageUrl)
+                .error(R.drawable.album_art_default)
+                .into(image);
 
         return view;
     }

@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-class AlbumsListAdapter extends BaseAdapter {
+class ArtistsListAdapter extends BaseAdapter {
 
     private LayoutInflater layoutInflater;
     private ArrayList<Artist> artists;
@@ -28,7 +28,7 @@ class AlbumsListAdapter extends BaseAdapter {
 
     private long playingArtistId;
 
-    AlbumsListAdapter(Activity activity) {
+    ArtistsListAdapter(Activity activity) {
         this.layoutInflater = LayoutInflater.from(activity);
         this.artists = new ArrayList<>();
         this.activity = activity;
@@ -71,7 +71,7 @@ class AlbumsListAdapter extends BaseAdapter {
         ViewHolder holder;
 
         if(view == null || view.getTag() == null) {
-            view = this.layoutInflater.inflate(R.layout.albums_list_item, parent, false);
+            view = this.layoutInflater.inflate(R.layout.artists_list_item, parent, false);
             holder = new ViewHolder();
 
             holder.artistName = (TextView) view.findViewById(R.id.album_artist);
@@ -90,14 +90,14 @@ class AlbumsListAdapter extends BaseAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlbumsListAdapter.this.openArtist(artist);
+                ArtistsListAdapter.this.openArtist(artist);
             }
         });
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AlbumsListAdapter.this.activity.registerForContextMenu(v);
-                AlbumsListAdapter.this.activity.openContextMenu(v);
+                ArtistsListAdapter.this.activity.registerForContextMenu(v);
+                ArtistsListAdapter.this.activity.openContextMenu(v);
                 return true;
             }
         });
@@ -125,7 +125,10 @@ class AlbumsListAdapter extends BaseAdapter {
             holder.playingIndicator.setImageResource(android.R.color.transparent);
         }
         String coverUrl = artist.getImagePath();
-        Picasso.with(this.activity).load(coverUrl).into(holder.image);
+        Picasso.with(this.activity)
+                .load(coverUrl)
+                .error(R.drawable.artist_image_default)
+                .into(holder.image);
     }
 
 

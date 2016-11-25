@@ -1,4 +1,4 @@
-package com.vlad.player.data.source;
+package com.vlad.player.data.services;
 
 import android.support.annotation.NonNull;
 
@@ -23,4 +23,6 @@ public interface IDbContext {
     void deleteSong(@NonNull Song song);
 
     ArrayList<SongFullInfo> getAllSongs();
+
+    void clearDb();
 }

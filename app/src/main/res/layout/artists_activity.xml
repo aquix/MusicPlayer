@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".ui.artists.AlbumsActivity">
+    tools:context=".ui.artists.ArtistsActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

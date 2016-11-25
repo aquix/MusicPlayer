@@ -84,7 +84,7 @@ class SongsListAdapter extends BaseAdapter {
             holder = new ViewHolder();
 
             holder.songName = (TextView) view.findViewById(R.id.song_name);
-            holder.songArtist = (TextView) view.findViewById(R.id.song_artist);
+            holder.songArtist = (TextView) view.findViewById(R.id.song_album);
             holder.songDuration = (TextView) view.findViewById(R.id.song_duration);
             holder.playingIndicator = (ImageView) view.findViewById(R.id.song_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.song_image);
@@ -125,7 +125,10 @@ class SongsListAdapter extends BaseAdapter {
             holder.playingIndicator.setImageResource(android.R.color.transparent);
         }
         String songImageUrl = song.getImagePath();
-        Picasso.with(this.activity).load(songImageUrl).into(holder.albumCover);
+        Picasso.with(this.activity)
+                .load(songImageUrl)
+                .error(R.drawable.album_art_default)
+                .into(holder.albumCover);
     }
 
 

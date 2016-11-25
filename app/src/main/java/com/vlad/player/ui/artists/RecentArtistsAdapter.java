@@ -18,12 +18,12 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 
-class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewHolder> {
+class RecentArtistsAdapter extends RecyclerView.Adapter<RecentArtistsAdapter.ViewHolder> {
 
     private List<Song> songs;
     private Context context;
 
-    AlbumsRecentAdapter(List<Song> songs, Context context) {
+    RecentArtistsAdapter(List<Song> songs, Context context) {
         this.songs = songs;
         this.context = context;
     }
@@ -31,7 +31,7 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        View v = inflater.inflate(R.layout.albums_list_footer_item, viewGroup, false);
+        View v = inflater.inflate(R.layout.recent_artists_list_item, viewGroup, false);
         return new ViewHolder(v);
     }
 
@@ -41,13 +41,17 @@ class AlbumsRecentAdapter extends RecyclerView.Adapter<AlbumsRecentAdapter.ViewH
         String coverUrl = this.songs.get(i).getImagePath();
 
         viewHolder.songName.setText(song.getName());
-        Picasso.with(this.context).load(coverUrl).into(viewHolder.cover);
+        Picasso.with(this.context)
+                .load(coverUrl)
+                .error(R.drawable.artist_image_default)
+                .into(viewHolder.cover);
+
         viewHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent songIntent = new Intent(AlbumsRecentAdapter.this.context, SongsActivity.class);
+                Intent songIntent = new Intent(RecentArtistsAdapter.this.context, SongsActivity.class);
                 songIntent.putExtra(Constants.SONG_BUNDLE.OPENED_SONG, song);
-                AlbumsRecentAdapter.this.context.startActivity(songIntent);
+                RecentArtistsAdapter.this.context.startActivity(songIntent);
             }
         });
     }

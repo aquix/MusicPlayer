@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.vlad.player.R;
 import com.vlad.player.data.models.Artist;
 import com.vlad.player.data.models.Song;
-import com.vlad.player.data.source.DbObservableContext;
+import com.vlad.player.data.services.DbObservableContext;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.UiUtils;
@@ -36,10 +36,9 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     private Artist artist;
 
     private SongsListAdapter adapter;
-    private DbObservableContext musicRepository;
+    private DbObservableContext dbService;
     private List<Song> songs;
     private boolean isSortBySize = true;
-
 
     private PlayerService playerService;
     private boolean isServiceBound = false;
@@ -62,13 +61,13 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
             openedSong = this.getArguments().getParcelable(Constants.SONG_BUNDLE.OPENED_SONG);
         }
 
-        this.musicRepository = DbObservableContext.getInstance(this.getContext());
+        this.dbService = DbObservableContext.getInstance(this.getContext());
         if(this.artist == null && openedSong != null) {
-            this.artist = this.musicRepository.getArtist(openedSong.getArtistId());
+            this.artist = this.dbService.getArtist(openedSong.getArtistId());
         }
 
         if(openedSong != null) {
-            List<Song> songs = this.musicRepository.getSongsForArtist(this.artist.getId(), this.isSortBySize);
+            List<Song> songs = this.dbService.getSongsForArtist(this.artist.getId(), this.isSortBySize);
             UiUtils.openSongPlayer(openedSong, songs, this.getActivity());
         }
     }
@@ -97,7 +96,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     }
 
     private void loadAlbums() {
-        this.songs = this.musicRepository.getSongsForArtist(this.artist.getId(), this.isSortBySize);
+        this.songs = this.dbService.getSongsForArtist(this.artist.getId(), this.isSortBySize);
         this.adapter.replaceData(this.songs);
     }
 
@@ -150,16 +149,26 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
                                     ContextMenu.ContextMenuInfo info) {
         super.onCreateContextMenu(menu, view, info);
         MenuInflater inflater = this.getActivity().getMenuInflater();
-        inflater.inflate(R.menu.list_context_menu, menu);
+        inflater.inflate(R.menu.songs_context_menu, menu);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        int position = info.position;
+        Song song = this.songs.get(position);
+
+        if (song == null) {
+            return false;
+        }
+
         switch (item.getItemId()) {
-            case R.id.remove_from_list_item:
-                AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-                int position = info.position;
-                Song song = this.songs.get(position);
+            case R.id.remove_song_from_disk:
+                File file = new File(song.getPath());
+                file.delete();
+                this.removeSong(song);
+                break;
+            case R.id.remove_song_from_list:
                 this.removeSong(song);
                 break;
         }
@@ -168,7 +177,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
 
     public void removeSong(Song song) {
         this.adapter.deleteSong(song);
-        this.musicRepository.deleteSong(song);
+        this.dbService.deleteSong(song);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             File file = new File(song.getPath());
