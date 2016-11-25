@@ -177,7 +177,7 @@ public class DbObservableContext implements IDbContext {
             comparator = new Comparator<Song>() {
                 @Override
                 public int compare(Song song1, Song song2) {
-                    return song1.getName().compareTo(song2.getName());
+                    return song1.getTitle().compareTo(song2.getTitle());
                 }
             };
         } else {

@@ -8,7 +8,7 @@ import com.vlad.player.data.services.DbConstants.SongEntity;
 
 
 class DbOpenHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 17;
+    private static final int DATABASE_VERSION = 18;
 
     private static final String DATABASE_NAME = "player.db";
 
@@ -22,7 +22,8 @@ class DbOpenHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + SongEntity.TABLE_NAME + " (" +
                     SongEntity._ID + " INTEGER" + " PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                     SongEntity.ARTIST_ID + " TEXT, " +
-                    SongEntity.NAME + " TEXT, " +
+                    SongEntity.TITLE + " TEXT, " +
+                    SongEntity.ALBUM + " TEXT, " +
                     SongEntity.IMAGE_PATH + " TEXT, " +
                     SongEntity.DURATION + " INTEGER, " +
                     SongEntity.PATH + " TEXT" +
@@ -42,9 +43,5 @@ class DbOpenHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + ArtistEntity.TABLE_NAME);
         db.execSQL(SQL_CREATE_TABLE_ALBUMS);
         db.execSQL(SQL_CREATE_TABLE_SONGS);
-    }
-
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Not required as at version 1
     }
 }

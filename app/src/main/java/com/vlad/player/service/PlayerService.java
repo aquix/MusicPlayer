@@ -197,7 +197,7 @@ public class PlayerService extends Service implements
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setContentTitle(this.getString(R.string.current_playing))
                 .setSmallIcon(R.drawable.ic_notification_icon)
-                .setContentText(this.songs.get(this.currentSongIndex).getName())
+                .setContentText(this.songs.get(this.currentSongIndex).getTitle())
                 .setContentIntent(PendingIntent.getActivity(this, 0, songIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -218,19 +218,12 @@ public class PlayerService extends Service implements
         this.notifyNextSong(song);
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return this.binder;
-    }
-
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         this.mediaPlayer.start();
         this.wasPrepared = true;
         RecentSongsService.addToRecent(this.songs.get(this.currentSongIndex));
         this.startForeground(NOTIFICATION_ID, this.getNotification());
-        Notification n = this.getNotification();
         for (PlayerCallback callback : this.callbacks) {
             this.notifyNewState(callback);
         }
@@ -238,6 +231,12 @@ public class PlayerService extends Service implements
             this.positionNotifierThread.start();
         }
         Log.d("thread", "started");
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return this.binder;
     }
 
     @Override

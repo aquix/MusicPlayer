@@ -8,19 +8,21 @@ import com.google.common.base.Objects;
 
 public class Song implements Parcelable {
     private long id;
-    private String name;
+    private String title;
     private String path;
+    private String album;
     private String imagePath;
     private int duration;
     private long artistId;
 
-    public Song(String name, String path, String imagePath, int duration, long artistId) {
-        this(0, name, path, imagePath, duration, artistId);
+    public Song(String title, String album, String path, String imagePath, int duration, long artistId) {
+        this(0, title, album, path, imagePath, duration, artistId);
     }
 
-    public Song(long id, String name, String path, String imagePath, int duration, long artistId) {
+    public Song(long id, String title, String album, String path, String imagePath, int duration, long artistId) {
         this.id = id;
-        this.name = name;
+        this.title = title;
+        this.album = album;
         this.path = path;
         this.imagePath = imagePath;
         this.duration = duration;
@@ -29,7 +31,8 @@ public class Song implements Parcelable {
 
     private Song(Parcel parcel) {
         this.id = parcel.readLong();
-        this.name = parcel.readString();
+        this.title = parcel.readString();
+        this.album = parcel.readString();
         this.path = parcel.readString();
         this.imagePath = parcel.readString();
         this.duration = parcel.readInt();
@@ -40,8 +43,8 @@ public class Song implements Parcelable {
         return this.id;
     }
 
-    public String getName() {
-        return this.name;
+    public String getTitle() {
+        return this.title;
     }
 
     public String getPath() {
@@ -60,6 +63,10 @@ public class Song implements Parcelable {
         return this.imagePath;
     }
 
+    public String getAlbum() {
+        return this.album;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -68,7 +75,8 @@ public class Song implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeLong(this.id);
-        parcel.writeString(this.name);
+        parcel.writeString(this.title);
+        parcel.writeString(this.album);
         parcel.writeString(this.path);
         parcel.writeString(this.imagePath);
         parcel.writeInt(this.duration);
@@ -95,11 +103,10 @@ public class Song implements Parcelable {
         }
         final Song song = (Song) obj;
         return Objects.equal(this.id, song.getId()) &&
-                Objects.equal(this.name, song.getName()) &&
+                Objects.equal(this.title, song.getTitle()) &&
                 Objects.equal(this.path, song.getPath()) &&
                 Objects.equal(this.imagePath, song.getImagePath()) &&
                 Objects.equal(this.duration, song.getDuration()) &&
                 Objects.equal(this.artistId, song.getArtistId());
     }
-
 }

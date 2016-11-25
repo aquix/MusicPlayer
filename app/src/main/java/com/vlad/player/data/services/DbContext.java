@@ -39,7 +39,8 @@ public class DbContext implements IDbContext {
         List<Song> songs = new ArrayList<>();
         String[] columnNames =  {
                 SongEntity.ID,
-                SongEntity.NAME,
+                SongEntity.TITLE,
+                SongEntity.ALBUM,
                 SongEntity.PATH,
                 SongEntity.DURATION,
                 SongEntity.IMAGE_PATH,
@@ -50,7 +51,7 @@ public class DbContext implements IDbContext {
 
         String sortBy;
         if (sortByName) {
-            sortBy = SongEntity.NAME;
+            sortBy = SongEntity.TITLE;
         } else {
             sortBy = SongEntity.DURATION;
         }
@@ -60,17 +61,19 @@ public class DbContext implements IDbContext {
 
         if (c != null && c.getCount() > 0) {
             while (c.moveToNext()) {
-                long songId = c
+                long id = c
                         .getLong(c.getColumnIndexOrThrow(SongEntity.ID));
-                String songName = c
-                        .getString(c.getColumnIndexOrThrow(SongEntity.NAME));
-                String songPath =
+                String title = c
+                        .getString(c.getColumnIndexOrThrow(SongEntity.TITLE));
+                String album =
+                        c.getString(c.getColumnIndexOrThrow(SongEntity.ALBUM));
+                String path =
                         c.getString(c.getColumnIndexOrThrow(SongEntity.PATH));
-                int songDuration =
+                int duration =
                         c.getInt(c.getColumnIndexOrThrow(SongEntity.DURATION));
-                String songImagePath =
+                String imagePath =
                         c.getString(c.getColumnIndexOrThrow(SongEntity.IMAGE_PATH));
-                Song song = new Song(songId, songName, songPath, songImagePath, songDuration, artistId);
+                Song song = new Song(id, title, album, path, imagePath, duration, artistId);
                 songs.add(song);
             }
         }
@@ -133,7 +136,8 @@ public class DbContext implements IDbContext {
 
             ContentValues values = new ContentValues();
             values.put(SongEntity.ARTIST_ID, artistId);
-            values.put(SongEntity.NAME, song.getName());
+            values.put(SongEntity.TITLE, song.getTitle());
+            values.put(SongEntity.ALBUM, song.getAlbum());
             values.put(SongEntity.PATH, song.getPath());
             values.put(SongEntity.DURATION, song.getDuration());
             values.put(SongEntity.IMAGE_PATH, song.getImagePath());
@@ -174,7 +178,8 @@ public class DbContext implements IDbContext {
         String[] columnNames = {
                 "Songs."+ SongEntity.ID +" as Id",
                 "Artists."+ ArtistEntity.NAME +" as Artist",
-                "Songs."+ SongEntity.NAME +" as Title",
+                "Songs."+ SongEntity.TITLE +" as Title",
+                "Songs."+ SongEntity.ALBUM +" as Album",
                 "Songs."+ SongEntity.DURATION +" as Duration",
                 "Songs."+ SongEntity.IMAGE_PATH +" as ImagePath"
         };
@@ -189,11 +194,13 @@ public class DbContext implements IDbContext {
                     c.getString(c.getColumnIndexOrThrow("Artist"));
             String title =
                     c.getString(c.getColumnIndexOrThrow("Title"));
+            String album =
+                    c.getString(c.getColumnIndexOrThrow("Album"));
             int duration =
                     c.getInt(c.getColumnIndexOrThrow("Duration"));
             String imagePath =
                     c.getString(c.getColumnIndexOrThrow("ImagePath"));
-            result.add(new SongFullInfo(id, artist, title, imagePath, duration));
+            result.add(new SongFullInfo(id, artist, title, album, imagePath, duration));
         }
 
         c.close();

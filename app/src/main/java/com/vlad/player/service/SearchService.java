@@ -68,13 +68,14 @@ public class SearchService extends Service {
                 MusicUtils.SongInfo songInfo = MusicUtils.extractSongInfo(songFile.getAbsolutePath());
                 String albumCover = MusicUtils.getCover(songInfo);
                 String songTitle = songInfo.title;
+                String songAlbum = songInfo.album;
                 if (songTitle == null || songTitle.isEmpty()) {
                     int nameLength = songFile.getName().length();
                     // exclude .mp3 extension
                     songTitle = songFile.getName().substring(nameLength - 4);
                 }
 
-                Song song = new Song(songTitle, songFile.getAbsolutePath(), albumCover, songInfo.duration, 0);
+                Song song = new Song(songTitle, songAlbum, songFile.getAbsolutePath(), albumCover, songInfo.duration, 0);
                 if (!groupedSongs.containsKey(songInfo.artist)) {
                     groupedSongs.put(songInfo.artist, new ArrayList<Song>());
                 }

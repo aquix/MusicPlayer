@@ -58,7 +58,7 @@ class SongsListAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         TextView songName;
-        TextView songArtist;
+        TextView songAlbum;
         TextView songDuration;
         ImageView playingIndicator;
         ImageView albumCover;
@@ -84,7 +84,7 @@ class SongsListAdapter extends BaseAdapter {
             holder = new ViewHolder();
 
             holder.songName = (TextView) view.findViewById(R.id.song_name);
-            holder.songArtist = (TextView) view.findViewById(R.id.song_album);
+            holder.songAlbum = (TextView) view.findViewById(R.id.song_album);
             holder.songDuration = (TextView) view.findViewById(R.id.song_duration);
             holder.playingIndicator = (ImageView) view.findViewById(R.id.song_playing_indicator);
             holder.albumCover = (ImageView) view.findViewById(R.id.song_image);
@@ -115,8 +115,8 @@ class SongsListAdapter extends BaseAdapter {
     }
 
     private void fillHolder(ViewHolder holder, Song song, int songIndex) {
-        holder.songName.setText(song.getName());
-        holder.songArtist.setText(this.artist.getName());
+        holder.songName.setText(song.getTitle());
+        holder.songAlbum.setText(song.getAlbum());
         holder.songDuration.setText(this.formatDuration(song.getDuration()));
         if(songIndex == this.playingSongIndex) {
             Drawable drawable = ContextCompat.getDrawable(this.activity, R.drawable.playing_indicator);

@@ -19,7 +19,8 @@ public final class DbConstants {
 
         static final String ID = "_id";
         static final String ARTIST_ID = "artist_id";
-        static final String NAME = "name";
+        static final String TITLE = "title";
+        static final String ALBUM = "album";
         static final String PATH = "path";
         static final String DURATION = "duration";
         static final String IMAGE_PATH = "image";

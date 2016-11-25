@@ -10,7 +10,7 @@
     <string name="playing_state">Playing State</string>
     <string name="song_image">Song Image</string>
     <string name="recent_songs">Recent Songs</string>
-    <string name="artists">Albums</string>
+    <string name="artists">Artists</string>
     <string name="remove">Remove</string>
     <string name="remove_from_disk">Remove from disk</string>
     <string name="current_playing">Current playing</string>

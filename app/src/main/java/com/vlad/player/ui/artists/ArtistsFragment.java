@@ -26,12 +26,10 @@ import com.vlad.player.R;
 import com.vlad.player.data.models.Artist;
 import com.vlad.player.data.models.Song;
 import com.vlad.player.data.services.DbObservableContext;
-import com.vlad.player.data.viewmodels.SongFullInfo;
 import com.vlad.player.service.PlayerService;
 import com.vlad.player.ui.view.HeaderGridView;
 import com.vlad.player.utils.RecentSongsService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ArtistsFragment extends Fragment implements
@@ -39,7 +37,7 @@ public class ArtistsFragment extends Fragment implements
         PlayerService.PlayerCallback {
 
     static {
-        // System.loadLibrary("native-lib");
+        System.loadLibrary("native-lib");
     }
 
     private static final int PORTRAIT_COLUMNS_COUNT = 2;
@@ -70,31 +68,7 @@ public class ArtistsFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         this.dbService = DbObservableContext.getInstance(this.getContext());
         this.dbService.addContentObserver(this);
-        ArrayList<Integer> durations = new ArrayList<>();
-        ArrayList<SongFullInfo> allSongs = this.dbService.getAllSongs();
-        for (SongFullInfo song : allSongs) {
-            durations.add(song.Duration);
-        }
-        this.checkJNI(durations);
         Log.d(TAG_LIFECYCLE, "onCreate");
-    }
-
-    private void checkJNI(ArrayList<Integer> durations) {
-        long result = this.sum(durations);
-        Log.d("JNI all songs duration", Long.toString(result));
-
-        long startTime = System.currentTimeMillis();
-        long sum = 0;
-        for (Integer value : durations) {
-            sum += value;
-        }
-        Log.d("Java all songs duration", Long.toString(sum));
-        Log.d("Java running time", "" + (System.currentTimeMillis() - startTime));
-
-    }
-
-    public long sum(ArrayList<Integer> list) {
-        return 0;
     }
 
     @Override
@@ -164,7 +138,7 @@ public class ArtistsFragment extends Fragment implements
         super.onStart();
         Intent intent = new Intent(this.getActivity(), PlayerService.class);
         this.getActivity().startService(intent);
-        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
+        this.getActivity().bindService(intent, this.serviceConnection, Context.BIND_AUTO_CREATE);
 
         if (!RecentSongsService.getRecent().isEmpty()) {
             this.header.setVisibility(View.VISIBLE);
@@ -178,7 +152,7 @@ public class ArtistsFragment extends Fragment implements
         super.onStop();
         if (this.isServiceBound) {
             this.playerService.removePlayerListener(this);
-            this.getActivity().unbindService(this.mConnection);
+            this.getActivity().unbindService(this.serviceConnection);
             this.isServiceBound = false;
         }
         this.dbService.removeContentObserver(this);
@@ -228,8 +202,7 @@ public class ArtistsFragment extends Fragment implements
     @Override
     public void onSeekPositionChange(int seekPosition) { }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-
+    private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
@@ -273,7 +246,6 @@ public class ArtistsFragment extends Fragment implements
         super.onDestroy();
         Log.d(TAG_LIFECYCLE, "onDestroy");
     }
-
 
     @Override
     public void onDetach() {

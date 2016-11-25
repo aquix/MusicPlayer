@@ -40,7 +40,7 @@ class RecentArtistsAdapter extends RecyclerView.Adapter<RecentArtistsAdapter.Vie
         final Song song = this.songs.get(i);
         String coverUrl = this.songs.get(i).getImagePath();
 
-        viewHolder.songName.setText(song.getName());
+        viewHolder.songName.setText(song.getTitle());
         Picasso.with(this.context)
                 .load(coverUrl)
                 .error(R.drawable.artist_image_default)

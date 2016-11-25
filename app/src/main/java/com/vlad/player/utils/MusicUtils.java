@@ -5,12 +5,15 @@ import android.media.MediaMetadataRetriever;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public final class MusicUtils {
     private static final String DEFAULT_COVER =
             "any incorrect string";
+    private static final String UNKNOWN_ARTIST = "Unknown artist";
+    private static final String UNKNOWN_ALBUM  = "Unknown album";
 
     public static class SongInfo {
         public String artist;
@@ -71,6 +74,22 @@ public final class MusicUtils {
         songInfo.title = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String duration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         songInfo.duration = Integer.parseInt(duration);
+
+        if (songInfo.artist == null || songInfo.artist.isEmpty()) {
+            songInfo.artist = UNKNOWN_ARTIST;
+        }
+
+        if (songInfo.album == null || songInfo.album.isEmpty()) {
+            songInfo.album = UNKNOWN_ALBUM;
+        }
+
+        if (songInfo.title == null || songInfo.title.isEmpty()) {
+            File songFile = new File(songPath);
+            int nameLength = songFile.getName().length();
+            // exclude .mp3 extension
+            songInfo.title = songFile.getName().substring(nameLength - 4);
+        }
+
         return songInfo;
     }
 

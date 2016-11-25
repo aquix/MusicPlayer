@@ -154,7 +154,7 @@ public class SongFragment extends Fragment implements PlayerService.PlayerCallba
         if (this.songPager.getCurrentItem() != this.songIndex) {
             this.songPager.setCurrentItem(this.songIndex, true);
         }
-        String songName = this.songs.get(this.songIndex).getName();
+        String songName = this.songs.get(this.songIndex).getTitle();
         if (this.toolbar != null) {
             this.toolbar.setTitle(songName);
         }

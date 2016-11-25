@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +31,7 @@ import com.vlad.player.utils.Constants;
 import com.vlad.player.utils.UiUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongsFragment extends Fragment implements PlayerService.PlayerCallback {
@@ -51,6 +53,21 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         fragment.setArguments(args);
         return fragment;
     }
+
+    private void checkJNI(ArrayList<Integer> durations) {
+        long result = this.sum(durations);
+        Log.d("NDK all songs duration", Long.toString(result));
+
+        long startTime = System.currentTimeMillis();
+        long sum = 0;
+        for (Integer value : durations) {
+            sum += value;
+        }
+        Log.d("JDK all songs duration", Long.toString(sum));
+        Log.d("JDK running time", "" + (System.currentTimeMillis() - startTime));
+    }
+
+    public native long sum(ArrayList<Integer> list);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,6 +102,13 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         this.loadAlbums();
 
         this.registerForContextMenu(albumsList);
+
+        // Check durations
+        ArrayList<Integer> durations = new ArrayList<>();
+        for (Song song : this.songs) {
+            durations.add(song.getDuration());
+        }
+        this.checkJNI(durations);
 
         return view;
     }
@@ -131,7 +155,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     public void onStart() {
         super.onStart();
         Intent intent = new Intent(this.getActivity(), PlayerService.class);
-        this.getActivity().bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
+        this.getActivity().bindService(intent, this.serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -139,7 +163,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
         super.onStop();
         if (this.isServiceBound) {
             this.playerService.removePlayerListener(this);
-            this.getActivity().unbindService(this.mConnection);
+            this.getActivity().unbindService(this.serviceConnection);
             this.isServiceBound = false;
         }
     }
@@ -210,7 +234,7 @@ public class SongsFragment extends Fragment implements PlayerService.PlayerCallb
     @Override
     public void onSeekPositionChange(int seekPosition) { }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection serviceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
